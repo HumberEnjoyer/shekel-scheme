@@ -14,7 +14,7 @@ const App = () => {
       const submission = { username, password };
       console.log(submission);
 
-      const response = await fetch(`http://localhost:8000/text-form`, {
+      const response = await fetch(`http://localhost:8000/upload/text-form`, {  
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submission),
@@ -48,7 +48,7 @@ const App = () => {
 
       console.log("Submitting FormData:", formData);
 
-      const response = await fetch("http://localhost:8000/form-multipart", {
+      const response = await fetch("http://localhost:8000/upload/form-multipart", {
         method: "POST",
         body: formData, // Do NOT set Content-Type (Browser does it)
       });
