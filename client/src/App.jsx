@@ -1,12 +1,16 @@
-// App.jsx
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css';
-
+import Login from "./Login"; // Import the Login component
+import Register from "./Register"; // Import the Register component
+import BuyNow from "./BuyNow"; // Import the BuyNow component
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedNft, setSelectedNft] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+  const [users, setUsers] = useState([]);
 
   // Example NFT data
   const placeholderNFTs = [
@@ -29,12 +33,51 @@ function App() {
     setCurrentPage("home");
   };
 
-  // If user clicked “Buy Now”, show the BuyNow screen
+  // Handle registration
+  const handleRegister = (registerData) => {
+    setUsers([...users, registerData]);
+    setCurrentPage("login");
+  };
+
+  // Handle login
+  const handleLogin = (loginData) => {
+    const user = users.find(user => user.email === loginData.email && user.password === loginData.password);
+    if (user) {
+      setIsLoggedIn(true);
+      setUsername(loginData.email);
+      setCurrentPage("home");
+    } else {
+      alert("Invalid username or password");
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUsername("");
+    setCurrentPage("home");
+  };
+
+  // Render the appropriate page based on currentPage state
   if (currentPage === "buyNow") {
     return (
       <>
-        <Navbar />
+        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
         <BuyNow nft={selectedNft} goBack={goBack} />
+      </>
+    );
+  } else if (currentPage === "login") {
+    return (
+      <>
+        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
+        <Login onLogin={handleLogin} />
+      </>
+    );
+  } else if (currentPage === "register") {
+    return (
+      <>
+        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
+        <Register onRegister={handleRegister} />
       </>
     );
   }
@@ -42,15 +85,15 @@ function App() {
   // Otherwise, show Home with NFT grid
   return (
     <>
-      <Navbar />
-      <div className="container my-5 text-center ">
+      <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
+      <div className="container my-5 text-center">
         <header className="mb-5">
           <h1 style={{ fontFamily: "'Pacifico', cursive" }}>Shekel Scheme</h1>
           <p className="lead">NFTs for people with questionable morals.</p>
         </header>
-        <div className="row ">
+        <div className="row">
           {placeholderNFTs.map((nft) => (
-            <div key={nft.id} className="col-md-4 mb-4 ">
+            <div key={nft.id} className="col-md-4 mb-4">
               <div className="card h-100 home-hover">
                 <img src={nft.image} className="card-img-top" alt={nft.title} />
                 <div className="card-body">
@@ -73,13 +116,30 @@ function App() {
 }
 
 // Basic Navbar
-function Navbar() {
+function Navbar({ navigateTo, isLoggedIn, username, onLogout }) {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
       <div className="container">
-        <a className="navbar-brand" href="/">
+        <a className="navbar-brand" href="#" onClick={() => navigateTo("home")}>
           Shekel Scheme
         </a>
+        {isLoggedIn ? (
+          <div className="d-flex align-items-center">
+            <span className="navbar-text text-light me-3">Welcome, {username}</span>
+            <button className="btn btn-outline-light" onClick={onLogout}>
+              Logout
+            </button>
+          </div>
+        ) : (
+          <>
+            <button className="btn btn-outline-light me-2" onClick={() => navigateTo("login")}>
+              Login
+            </button>
+            <button className="btn btn-outline-light" onClick={() => navigateTo("register")}>
+              Register
+            </button>
+          </>
+        )}
       </div>
     </nav>
   );
