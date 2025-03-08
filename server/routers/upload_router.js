@@ -1,39 +1,60 @@
 import express from "express";
 import upload from "../middleware/multer.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// route handling query -> use ? in URL bar
-router.get("/query", (req, res) => {
-  console.log(req.query);
-  res.send("Welcome to query");
+// Load existing NFTs from JSON file
+const nftsFile = path.join(__dirname, "..", "nfts.json");
+const getNFTs = () => {
+  if (fs.existsSync(nftsFile)) {
+    return JSON.parse(fs.readFileSync(nftsFile, "utf8"));
+  }
+  return [];
+};
+
+const saveNFTs = (nfts) => {
+  fs.writeFileSync(nftsFile, JSON.stringify(nfts, null, 2));
+};
+
+// Get all NFTs
+router.get("/nfts", (req, res) => {
+  const nfts = getNFTs();
+  res.json(nfts);
 });
 
-// route handling params -> use : in server file, and add params without : inside URL bar
-router.get("/params/:variable1", (req, res) => {
-  console.log(req.params);
-  res.send("Welcome to params");
-});
-
-// route handling recieving text from a form -> /upload/text-form
-router.post("/text-form", (req, res) => {
-  console.log(req.body);
-  res.json("Welcome to the text form submission");
-});
-
-// route handling recieving file data -> /upload/form-multipart
-router.post("/form-multipart", upload.single("image"), (req, res) => {
-    console.log("Received Form Data:", req.body);
-    console.log("Uploaded File:", req.file);
-  
+// Upload new NFT
+router.post("/nft", upload.single("image"), (req, res) => {
+  try {
     if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      return res.status(400).json({ error: "No image uploaded" });
     }
-  
-    res.json({
-      message: "Image uploaded successfully",
-      filePath: `/uploads/${req.file.filename}`,
-    });
-  });
+
+    const { title, price } = req.body;
+    if (!title || !price) {
+      return res.status(400).json({ error: "Title and price are required" });
+    }
+
+    const nfts = getNFTs();
+    const newNFT = {
+      id: nfts.length + 1,
+      title,
+      price: `$${price}`,
+      image: `/${req.file.filename}`,
+    };
+
+    nfts.push(newNFT);
+    saveNFTs(nfts);
+
+    res.status(201).json(newNFT);
+  } catch (error) {
+    console.error("Error creating NFT:", error);
+    res.status(500).json({ error: "Failed to create NFT" });
+  }
+});
 
 export default router;

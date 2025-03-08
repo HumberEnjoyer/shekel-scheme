@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css';
-import Login from "./Login"; // Import the Login component
-import Register from "./Register"; // Import the Register component
-import BuyNow from "./BuyNow"; // Import the BuyNow component
+import Login from "./Login";
+import Register from "./Register";
+import BuyNow from "./BuyNow";
+import CreateNFT from "./CreateNFT";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
@@ -11,16 +12,35 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [users, setUsers] = useState([]);
-
-  // Example NFT data
-  const placeholderNFTs = [
+  const [nfts, setNfts] = useState([
     { id: 1, title: "Art", image: "/cow.png", price: "$50" },
     { id: 2, title: "Digital Wonder", image: "/duck.png", price: "$70" },
     { id: 3, title: "Modern Portrait", image: "/fish.png", price: "$100" },
     { id: 4, title: "Zebra", image: "/zebra.png", price: "$25" },
     { id: 5, title: "Proboscis", image: "/monkey.png", price: "$45" },
     { id: 6, title: "Shekel", image: "/shekel.png", price: "$95" },
-  ];
+  ]);
+
+  useEffect(() => {
+    fetchNFTs();
+  }, []);
+
+  const fetchNFTs = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/upload/nfts');
+      if (response.ok) {
+        const userNFTs = await response.json();
+        setNfts(prevNfts => [...prevNfts, ...userNFTs]);
+      }
+    } catch (error) {
+      console.error('Error fetching NFTs:', error);
+    }
+  };
+
+  const handleNFTCreated = (newNFT) => {
+    setNfts(prevNfts => [...prevNfts, newNFT]);
+    setCurrentPage("home");
+  };
 
   // Switch to buy page
   const handleBuyNow = (nft) => {
@@ -80,6 +100,13 @@ function App() {
         <Register onRegister={handleRegister} />
       </>
     );
+  } else if (currentPage === "create") {
+    return (
+      <>
+        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
+        <CreateNFT onNFTCreated={handleNFTCreated} />
+      </>
+    );
   }
 
   // Otherwise, show Home with NFT grid
@@ -90,9 +117,17 @@ function App() {
         <header className="mb-5">
           <h1 style={{ fontFamily: "'Pacifico', cursive" }}>Shekel Scheme</h1>
           <p className="lead">NFTs for people with questionable morals.</p>
+          {isLoggedIn && (
+            <button
+              className="btn btn-success mb-4"
+              onClick={() => setCurrentPage("create")}
+            >
+              Create New NFT
+            </button>
+          )}
         </header>
         <div className="row">
-          {placeholderNFTs.map((nft) => (
+          {nfts.map((nft) => (
             <div key={nft.id} className="col-md-4 mb-4">
               <div className="card h-100 home-hover">
                 <img src={nft.image} className="card-img-top" alt={nft.title} />
@@ -126,6 +161,9 @@ function Navbar({ navigateTo, isLoggedIn, username, onLogout }) {
         {isLoggedIn ? (
           <div className="d-flex align-items-center">
             <span className="navbar-text text-light me-3">Welcome, {username}</span>
+            <button className="btn btn-outline-light me-2" onClick={() => navigateTo("create")}>
+              Create NFT
+            </button>
             <button className="btn btn-outline-light" onClick={onLogout}>
               Logout
             </button>
