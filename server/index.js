@@ -3,9 +3,14 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import dotenv from 'dotenv';
+import connectDB from './config/db.js';
 
 import fetch_router from "./routers/fetch_router.js";
 import upload_router from "./routers/upload_router.js";
+
+// Load env vars
+dotenv.config();
 
 // Enable __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +18,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB
+connectDB();
 
 // middleware
 app.use(express.urlencoded({ extended: true }));
