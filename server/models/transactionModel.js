@@ -1,37 +1,30 @@
 import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
-    sender: {
+    nft: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'NFT',
+        required: true
+    },
+    seller: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    receiver: {
+    buyer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    amount: {
+    price: {
         type: Number,
-        required: [true, 'Amount is required'],
-        min: [0, 'Amount must be positive']
+        required: [true, 'Price is required'],
+        min: [0, 'Price must be positive']
     },
-    currency: {
+    transactionHash: {
         type: String,
         required: true,
-        default: 'USD',
-        enum: ['USD', 'EUR', 'GBP', 'ILS']
-    },
-    transactionType: {
-        type: String,
-        required: true,
-        enum: ['transfer', 'deposit', 'withdrawal'],
-        default: 'transfer'
-    },
-    description: {
-        type: String,
-        required: [true, 'Description is required'],
-        trim: true
+        unique: true
     },
     status: {
         type: String,
