@@ -18,25 +18,33 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Password is required'],
         minlength: [6, 'Password must be at least 6 characters']
     },
-    balance: {
-        type: Number,
-        default: 0
+    walletAddress: {
+        type: String,
+        required: [true, 'Wallet address is required'],
+        unique: true
     },
     profile: {
         firstName: { type: String, trim: true },
         lastName: { type: String, trim: true },
-        phoneNumber: { type: String },
-        address: { type: String },
+        bio: { type: String, maxlength: 500 },
         avatar: { type: String, default: 'default-avatar.png' }
     },
     isVerified: {
         type: Boolean,
         default: false
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    createdNFTs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'NFT'
+    }],
+    ownedNFTs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'NFT'
+    }],
+    collections: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Collection'
+    }]
 }, {
     timestamps: true
 });
