@@ -22,6 +22,17 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    profile: {
+        firstName: { type: String, trim: true },
+        lastName: { type: String, trim: true },
+        phoneNumber: { type: String },
+        address: { type: String },
+        avatar: { type: String, default: 'default-avatar.png' }
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

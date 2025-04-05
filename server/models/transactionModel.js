@@ -16,6 +16,18 @@ const transactionSchema = new mongoose.Schema({
         required: [true, 'Amount is required'],
         min: [0, 'Amount must be positive']
     },
+    currency: {
+        type: String,
+        required: true,
+        default: 'USD',
+        enum: ['USD', 'EUR', 'GBP', 'ILS']
+    },
+    transactionType: {
+        type: String,
+        required: true,
+        enum: ['transfer', 'deposit', 'withdrawal'],
+        default: 'transfer'
+    },
     description: {
         type: String,
         required: [true, 'Description is required'],
@@ -25,6 +37,10 @@ const transactionSchema = new mongoose.Schema({
         type: String,
         enum: ['pending', 'completed', 'failed'],
         default: 'pending'
+    },
+    failureReason: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true
