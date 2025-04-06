@@ -27,9 +27,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 
-// routes
+//routes
 app.use("/fetch", fetch_router);
 app.use("/upload", upload_router);
+app.use("/auth", auth_router); 
 
 // Basic route for testing
 app.get("/", (req, res) => {
