@@ -8,6 +8,7 @@ import connectDB from './config/db.js';
 
 import fetch_router from "./routers/fetch_router.js";
 import upload_router from "./routers/upload_router.js";
+import auth_router from "./routers/auth_router.js";
 
 // Load env vars
 dotenv.config();
@@ -30,7 +31,7 @@ app.use(cors());
 //routes
 app.use("/fetch", fetch_router);
 app.use("/upload", upload_router);
-app.use("/auth", auth_router); 
+app.use("/auth", auth_router); // Use the auth router
 
 // Basic route for testing
 app.get("/", (req, res) => {

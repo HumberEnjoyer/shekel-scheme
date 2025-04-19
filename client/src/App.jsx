@@ -42,24 +42,20 @@ function App() {
     setCurrentPage("home");
   };
 
-  // Switch to buy page
   const handleBuyNow = (nft) => {
     setSelectedNft(nft);
     setCurrentPage("buyNow");
   };
 
-  // Switch back to home
   const goBack = () => {
     setCurrentPage("home");
   };
 
-  // Handle registration
   const handleRegister = (registerData) => {
     setUsers([...users, registerData]);
     setCurrentPage("login");
   };
 
-  // Handle login
   const handleLogin = (loginData) => {
     const user = users.find(user => user.email === loginData.email && user.password === loginData.password);
     if (user) {
@@ -71,14 +67,12 @@ function App() {
     }
   };
 
-  // Handle logout
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername("");
     setCurrentPage("home");
   };
 
-  // Render the appropriate page based on currentPage state
   if (currentPage === "buyNow") {
     return (
       <>
@@ -109,48 +103,49 @@ function App() {
     );
   }
 
-  // Otherwise, show Home with NFT grid
   return (
     <>
       <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
-      <div className="container my-5 text-center">
-        <header className="mb-5">
-          <h1 style={{ fontFamily: "'Pacifico', cursive" }}>Shekel Scheme</h1>
-          <p className="lead">NFTs for people with questionable morals.</p>
-          {isLoggedIn && (
-            <button
-              className="btn btn-success mb-4"
-              onClick={() => setCurrentPage("create")}
-            >
-              Create New NFT
-            </button>
-          )}
-        </header>
-        <div className="row">
-          {nfts.map((nft) => (
-            <div key={nft.id} className="col-md-4 mb-4">
-              <div className="card h-100 home-hover">
-                <img src={nft.image} className="card-img-top" alt={nft.title} />
-                <div className="card-body">
-                  <h5 className="card-title">{nft.title}</h5>
-                  <p className="card-text">Price: {nft.price}</p>
-                  <button
-                    className="btn btn-primary w-100"
-                    onClick={() => handleBuyNow(nft)}
-                  >
-                    Buy Now
-                  </button>
+      <div className="main-content-wrapper">
+        <div className="container-fluid text-center">
+          <header className="mb-5">
+            <h1 style={{ fontFamily: "'Pacifico', cursive" }}>Shekel Scheme</h1>
+            <p className="lead">NFTs for people with questionable morals.</p>
+            {isLoggedIn && (
+              <button
+                className="btn btn-success mb-4"
+                onClick={() => setCurrentPage("create")}
+              >
+                Create New NFT
+              </button>
+            )}
+          </header>
+          <div className="row justify-content-center g-5">
+            {nfts.map((nft) => (
+              <div key={nft.id} className="col-12 col-md-4">
+
+                <div className="card h-100 home-hover">
+                  <img src={nft.image} className="card-img-top" alt={nft.title} />
+                  <div className="card-body">
+                    <h5 className="card-title">{nft.title}</h5>
+                    <p className="card-text">Price: {nft.price}</p>
+                    <button
+                      className="btn btn-primary w-100"
+                      onClick={() => handleBuyNow(nft)}
+                    >
+                      Buy Now
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </>
   );
 }
 
-// Basic Navbar
 function Navbar({ navigateTo, isLoggedIn, username, onLogout }) {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
@@ -169,14 +164,14 @@ function Navbar({ navigateTo, isLoggedIn, username, onLogout }) {
             </button>
           </div>
         ) : (
-          <>
-            <button className="btn btn-outline-light me-2" onClick={() => navigateTo("login")}>
+          <div className="d-flex gap-2">
+            <button className="btn btn-outline-light" onClick={() => navigateTo("login")}>
               Login
             </button>
             <button className="btn btn-outline-light" onClick={() => navigateTo("register")}>
               Register
             </button>
-          </>
+          </div>
         )}
       </div>
     </nav>
