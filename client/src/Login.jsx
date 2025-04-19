@@ -10,22 +10,11 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}
-    >
-      <div
-        className="card shadow-lg"
-        style={{
-          width: "100%",
-          maxWidth: "600px",
-          padding: "3rem",
-          borderRadius: "12px",
-        }}
-      >
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa", width: "100vw" }}>
+      <div className="card shadow p-5" style={{ width: "100%", maxWidth: "600px", borderRadius: "12px" }}>
         <h2 className="text-center mb-4">Login</h2>
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+          <div className="mb-3">
             <label htmlFor="email" className="form-label">Email address</label>
             <input
               type="email"
@@ -51,8 +40,8 @@ function Login({ onLogin }) {
             Login
           </button>
         </form>
+        </div>
       </div>
-    </div>
   );
 }
 
