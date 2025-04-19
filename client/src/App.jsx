@@ -11,6 +11,8 @@ function App() {
   const [selectedNft, setSelectedNft] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const [token, setToken] = useState(null);
+  const [shekelBalance, setShekelBalance] = useState(0);
   const [nfts, setNfts] = useState([
     { id: 1, title: "Art", image: "/cow.png", price: "$50" },
     { id: 2, title: "Digital Wonder", image: "/duck.png", price: "$70" },
@@ -36,6 +38,22 @@ function App() {
     }
   };
 
+  const fetchShekelBalance = async (token) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/balance", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setShekelBalance(data.balance);
+      }
+    } catch (err) {
+      console.error("Error fetching balance:", err);
+    }
+  };
+
   const handleNFTCreated = (newNFT) => {
     setNfts(prevNfts => [...prevNfts, newNFT]);
     setCurrentPage("home");
@@ -49,7 +67,6 @@ function App() {
   const goBack = () => {
     setCurrentPage("home");
   };
-
 
   const handleLogin = async ({ email, password }) => {
     try {
@@ -66,7 +83,9 @@ function App() {
       if (res.ok) {
         setIsLoggedIn(true);
         setUsername(data.username || data.email);
+        setToken(data.token);
         setCurrentPage("home");
+        fetchShekelBalance(data.token);
       } else {
         alert(data.message || "Invalid username or password");
       }
@@ -79,6 +98,7 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername("");
+    setToken(null);
     setCurrentPage("home");
   };
 
@@ -89,28 +109,28 @@ function App() {
   if (currentPage === "buyNow") {
     return (
       <>
-        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
-        <BuyNow nft={selectedNft} goBack={goBack} />
+        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} balance={shekelBalance} onLogout={handleLogout} />
+        <BuyNow nft={selectedNft} goBack={goBack} isLoggedIn={isLoggedIn} token={token} />
       </>
     );
   } else if (currentPage === "login") {
     return (
       <>
-        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
+        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} balance={shekelBalance} onLogout={handleLogout} />
         <Login onLogin={handleLogin} />
       </>
     );
   } else if (currentPage === "register") {
     return (
       <>
-        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
+        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} balance={shekelBalance} onLogout={handleLogout} />
         <Register onRegister={handleRegister} />
       </>
     );
   } else if (currentPage === "create") {
     return (
       <>
-        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
+        <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} balance={shekelBalance} onLogout={handleLogout} />
         <CreateNFT onNFTCreated={handleNFTCreated} />
       </>
     );
@@ -118,7 +138,7 @@ function App() {
 
   return (
     <>
-      <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
+      <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} balance={shekelBalance} onLogout={handleLogout} />
       <div className="main-content-wrapper">
         <div className="container text-center">
           <header className="mb-5">
@@ -158,31 +178,21 @@ function App() {
   );
 }
 
-function Navbar({ navigateTo, isLoggedIn, username, onLogout }) {
+function Navbar({ navigateTo, isLoggedIn, username, balance, onLogout }) {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100" style={{ padding: "10px 40px" }}>
       <div className="container-fluid d-flex justify-content-between">
-        <a className="navbar-brand fw-bold" href="#" onClick={() => navigateTo("home")}>
-          Shekel Scheme
-        </a>
+        <a className="navbar-brand fw-bold" href="#" onClick={() => navigateTo("home")}>Shekel Scheme</a>
         {isLoggedIn ? (
           <div className="d-flex align-items-center gap-2">
-            <span className="navbar-text text-light me-3">Welcome, {username}</span>
-            <button className="btn btn-outline-light me-2" onClick={() => navigateTo("create")}>
-              Create NFT
-            </button>
-            <button className="btn btn-outline-light" onClick={onLogout}>
-              Logout
-            </button>
+            <span className="navbar-text text-light me-3">Welcome, {username} | {balance} Shekel Coins</span>
+            <button className="btn btn-outline-light me-2" onClick={() => navigateTo("create")}>Create NFT</button>
+            <button className="btn btn-outline-light" onClick={onLogout}>Logout</button>
           </div>
         ) : (
           <div className="d-flex gap-2">
-            <button className="btn btn-outline-light" onClick={() => navigateTo("login")}>
-              Login
-            </button>
-            <button className="btn btn-outline-light" onClick={() => navigateTo("register")}>
-              Register
-            </button>
+            <button className="btn btn-outline-light" onClick={() => navigateTo("login")}>Login</button>
+            <button className="btn btn-outline-light" onClick={() => navigateTo("register")}>Register</button>
           </div>
         )}
       </div>
