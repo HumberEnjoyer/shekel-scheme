@@ -3,10 +3,33 @@ import React, { useState } from "react";
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin({ email, password });
+
+    try {
+      const response = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        onLogin({
+          token: data.token,
+          email: data.email,
+          username: data.username,
+        });
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -15,7 +38,7 @@ function Login({ onLogin }) {
         <h2 className="text-center mb-4">Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email address</label>
+            <label htmlFor="email" className="form-label">Email</label>
             <input
               type="email"
               className="form-control"
@@ -36,12 +59,11 @@ function Login({ onLogin }) {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100 fs-5">
-            Login
-          </button>
+          {error && <div className="alert alert-danger">{error}</div>}
+          <button type="submit" className="btn btn-primary w-100 fs-5">Login</button>
         </form>
-        </div>
       </div>
+    </div>
   );
 }
 

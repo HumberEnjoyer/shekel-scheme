@@ -5,6 +5,10 @@ function CreateNFT({ onNFTCreated }) {
   const [price, setPrice] = useState('');
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const user = JSON.parse(localStorage.getItem('user'));
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -16,31 +20,43 @@ function CreateNFT({ onNFTCreated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    if (!user || !user.token) {
+      setError("You must be logged in to create NFTs.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('price', price);
     formData.append('image', image);
+    formData.append('description', 'Auto-generated NFT'); // default
 
     try {
       const response = await fetch('http://localhost:5000/upload/nft', {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
         body: formData,
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
+        setSuccess("NFT created successfully!");
         onNFTCreated(data);
         setTitle('');
         setPrice('');
         setImage(null);
         setPreview('');
+        setError('');
       } else {
-        throw new Error('Failed to upload NFT');
+        setError(data.error || "Failed to create NFT.");
       }
-    } catch (error) {
-      console.error('Error uploading NFT:', error);
-      alert('Failed to upload NFT. Please try again.');
+    } catch (err) {
+      console.error("Error uploading NFT:", err);
+      setError("An error occurred. Please try again.");
     }
   };
 
@@ -95,9 +111,9 @@ function CreateNFT({ onNFTCreated }) {
                     />
                   </div>
                 )}
-                <button type="submit" className="btn btn-primary w-100">
-                  Create NFT
-                </button>
+                {error && <div className="alert alert-danger">{error}</div>}
+                {success && <div className="alert alert-success">{success}</div>}
+                <button type="submit" className="btn btn-primary w-100">Create NFT</button>
               </form>
             </div>
           </div>

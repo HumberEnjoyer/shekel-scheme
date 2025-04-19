@@ -11,7 +11,6 @@ function App() {
   const [selectedNft, setSelectedNft] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
-  const [users, setUsers] = useState([]);
   const [nfts, setNfts] = useState([
     { id: 1, title: "Art", image: "/cow.png", price: "$50" },
     { id: 2, title: "Digital Wonder", image: "/duck.png", price: "$70" },
@@ -51,19 +50,29 @@ function App() {
     setCurrentPage("home");
   };
 
-  const handleRegister = (registerData) => {
-    setUsers([...users, registerData]);
-    setCurrentPage("login");
-  };
+  // ✅ Updated: Real login via backend
+  const handleLogin = async ({ email, password }) => {
+    try {
+      const res = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-  const handleLogin = (loginData) => {
-    const user = users.find(user => user.email === loginData.email && user.password === loginData.password);
-    if (user) {
-      setIsLoggedIn(true);
-      setUsername(loginData.email);
-      setCurrentPage("home");
-    } else {
-      alert("Invalid username or password");
+      const data = await res.json();
+
+      if (res.ok) {
+        setIsLoggedIn(true);
+        setUsername(data.username || data.email);
+        setCurrentPage("home");
+      } else {
+        alert(data.message || "Invalid username or password");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Server error. Please try again later.");
     }
   };
 
@@ -71,6 +80,10 @@ function App() {
     setIsLoggedIn(false);
     setUsername("");
     setCurrentPage("home");
+  };
+
+  const handleRegister = () => {
+    setCurrentPage("login");
   };
 
   if (currentPage === "buyNow") {
@@ -107,7 +120,7 @@ function App() {
     <>
       <Navbar navigateTo={setCurrentPage} isLoggedIn={isLoggedIn} username={username} onLogout={handleLogout} />
       <div className="main-content-wrapper">
-        <div className="container-fluid text-center">
+        <div className="container text-center">
           <header className="mb-5">
             <h1 style={{ fontFamily: "'Pacifico', cursive" }}>Shekel Scheme</h1>
             <p className="lead">NFTs for people with questionable morals.</p>
@@ -120,10 +133,9 @@ function App() {
               </button>
             )}
           </header>
-          <div className="row justify-content-center g-5">
+          <div className="row justify-content-center g-4">
             {nfts.map((nft) => (
               <div key={nft.id} className="col-12 col-md-4">
-
                 <div className="card h-100 home-hover">
                   <img src={nft.image} className="card-img-top" alt={nft.title} />
                   <div className="card-body">
@@ -148,13 +160,13 @@ function App() {
 
 function Navbar({ navigateTo, isLoggedIn, username, onLogout }) {
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-      <div className="container">
-        <a className="navbar-brand" href="#" onClick={() => navigateTo("home")}>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100" style={{ padding: "10px 40px" }}>
+      <div className="container-fluid d-flex justify-content-between">
+        <a className="navbar-brand fw-bold" href="#" onClick={() => navigateTo("home")}>
           Shekel Scheme
         </a>
         {isLoggedIn ? (
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center gap-2">
             <span className="navbar-text text-light me-3">Welcome, {username}</span>
             <button className="btn btn-outline-light me-2" onClick={() => navigateTo("create")}>
               Create NFT

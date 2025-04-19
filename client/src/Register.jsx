@@ -1,43 +1,44 @@
 import React, { useState } from "react";
 
 function Register({ onRegister }) {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirm) {
-      setError("Passwords do not match");
-      setSuccess("");
+      setMessage("Passwords do not match.");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/register", {
+      const res = await fetch("http://localhost:5000/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, email, walletAddress, password }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        setSuccess("Account created successfully!");
-        setError("");
+        setMessage("Registered successfully. You can now log in.");
+        setUsername("");
         setEmail("");
+        setWalletAddress("");
         setPassword("");
         setConfirm("");
         if (onRegister) onRegister();
       } else {
-        const data = await res.json();
-        setError(data.message || "Registration failed.");
-        setSuccess("");
+        setMessage(data.message || "Registration failed.");
       }
     } catch (err) {
-      setError("Error connecting to server.");
-      setSuccess("");
+      console.error("Register error:", err);
+      setMessage("Server error.");
     }
   };
 
@@ -47,43 +48,27 @@ function Register({ onRegister }) {
         <h2 className="text-center mb-4">Register</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email address</label>
-            <input
-              type="email"
-              className="form-control"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <label className="form-label">Username</label>
+            <input type="text" className="form-control" value={username} onChange={(e) => setUsername(e.target.value)} required />
           </div>
           <div className="mb-3">
-            <label htmlFor="password" className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <label className="form-label">Email</label>
+            <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Wallet Address</label>
+            <input type="text" className="form-control" value={walletAddress} onChange={(e) => setWalletAddress(e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Password</label>
+            <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <div className="mb-4">
-            <label htmlFor="confirm" className="form-label">Confirm Password</label>
-            <input
-              type="password"
-              className="form-control"
-              id="confirm"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-            />
+            <label className="form-label">Confirm Password</label>
+            <input type="password" className="form-control" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
           </div>
-          {error && <div className="alert alert-danger">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
-          <button type="submit" className="btn btn-primary w-100 fs-5">
-            Register
-          </button>
+          {message && <div className="alert alert-info">{message}</div>}
+          <button type="submit" className="btn btn-primary w-100 fs-5">Register</button>
         </form>
       </div>
     </div>
