@@ -11,14 +11,15 @@ function Login({ onLogin }) {
 
   return (
     <div
-      className="d-flex justify-content-center align-items-center w-100"
+      className="d-flex justify-content-center align-items-center"
       style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}
     >
       <div
-        className="card shadow-lg p-5"
+        className="card shadow-lg"
         style={{
           width: "100%",
           maxWidth: "600px",
+          padding: "3rem",
           borderRadius: "12px",
         }}
       >
