@@ -8,6 +8,11 @@ function Login({ onLogin }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!email || !password) {
+      alert("Email and password are required.");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
@@ -18,11 +23,8 @@ function Login({ onLogin }) {
       const data = await response.json();
 
       if (response.ok) {
-        onLogin({
-          token: data.token,
-          email: data.email,
-          username: data.username,
-        });
+        // Pass back email and password so App.jsx can handle it correctly
+        onLogin({ email, password });
       } else {
         setError(data.message || "Login failed");
       }

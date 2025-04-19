@@ -50,7 +50,7 @@ function App() {
     setCurrentPage("home");
   };
 
-  // ✅ Updated: Real login via backend
+
   const handleLogin = async ({ email, password }) => {
     try {
       const res = await fetch("http://localhost:5000/auth/login", {

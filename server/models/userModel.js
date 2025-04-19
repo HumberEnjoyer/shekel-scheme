@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    shekelTokens: {
+      type: Number,
+      default: 30, // Users start with 30 Shekel tokens
+    },
     createdNFTs: [
       {
         type: mongoose.Schema.Types.ObjectId,
