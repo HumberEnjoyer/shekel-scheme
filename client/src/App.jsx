@@ -8,7 +8,7 @@ import CreateNFT from "./CreateNFT";
 import AddFunds from "./AddFunds"
 import Comments from "./Comments"
 
-const API = "http://localhost:5000"; 
+const API = "http://localhost:3000"; 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedNft, setSelectedNft] = useState(null);
@@ -108,27 +108,9 @@ function App() {
     fetchNFTs();
   }, []);
 
-<<<<<<< HEAD
-  const fetchNFTs = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/upload/nfts");
-      if (res.ok) {
-        const userNFTs = await res.json();
-        setNfts((prev) => [...prev, ...userNFTs]);
-      }
-    } catch (err) {
-      console.error("Error fetching NFTs:", err);
-    }
-  };
-
-  const fetchShekelBalance = async (tok) => {
-    try {
-      const res = await fetch("http://localhost:3000/api/balance", {
-=======
   const fetchShekelBalance = async (tok) => {
     try {
       const res = await fetch(`${API}/api/balance`, {
->>>>>>> fbcd7d29bfe529bbd91c1c64d7a17d07cb894126
         headers: { Authorization: `Bearer ${tok}` },
       });
       const data = await res.json();
@@ -161,11 +143,7 @@ function App() {
 
   const handleLogin = async ({ email, password }) => {
     try {
-<<<<<<< HEAD
-      const res = await fetch("http://localhost:3000/auth/login", {
-=======
       const res = await fetch(`${API}/auth/login`, {
->>>>>>> fbcd7d29bfe529bbd91c1c64d7a17d07cb894126
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -269,31 +247,6 @@ function App() {
               </button>
             )}
           </header>
-<<<<<<< HEAD
-          <div className="row justify-content-center g-4">
-            {nfts.map((nft) => (
-              <div key={nft.id} className="col-12 col-md-4">
-                <div className="card h-100 home-hover">
-                  <img
-                    src={nft.image}
-                    className="card-img-top"
-                    alt={nft.title}
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title">{nft.title}</h5>
-                    <p className="card-text">Price: {nft.price}</p>
-                    <button
-                      className="btn btn-primary w-100 mb-3"
-                      onClick={() => handleBuyNow(nft)}
-                    >
-                      Buy Now
-                    </button>
-                    <Comments 
-                      nftId={nft.id} 
-                      token={token}
-                      isLoggedIn={isLoggedIn}
-                    />
-=======
 
           {loading ? (
             <div className="spinner-border text-primary" role="status">
@@ -308,11 +261,15 @@ function App() {
                     <div className="card-body">
                       <h5 className="card-title">{nft.title}</h5>
                       <p className="card-text">Price: {nft.price}</p>
-                      <button className="btn btn-primary w-100" onClick={() => handleBuyNow(nft)}>
+                      <button className="btn btn-primary w-100 mb-3" onClick={() => handleBuyNow(nft)}>
                         Buy Now
                       </button>
+                      <Comments 
+                        nftId={nft._id} 
+                        token={token}
+                        isLoggedIn={isLoggedIn}
+                      />
                     </div>
->>>>>>> fbcd7d29bfe529bbd91c1c64d7a17d07cb894126
                   </div>
                 </div>
               ))}
@@ -336,26 +293,18 @@ function Navbar({ navigateTo, isLoggedIn, username, balance, onLogout }) {
             <span className="navbar-text text-light me-3">
               Welcome, {username} | {balance} Shekel Coins
             </span>
-<<<<<<< HEAD
-            <button
-              className="btn btn-outline-light me-2"
-              onClick={() => navigateTo("create")}
-            >
-              Create NFT
-            </button>
             <button
               className="btn btn-outline-light me-2"
               onClick={() => navigateTo("addFunds")}
             >
               Add Funds
             </button>
+            <button className="btn btn-outline-light me-2" onClick={() => navigateTo("create")}>
+              Create NFT
+            </button>
             <button className="btn btn-outline-light" onClick={onLogout}>
               Logout
             </button>
-=======
-            <button className="btn btn-outline-light me-2" onClick={() => navigateTo("create")}>Create NFT</button>
-            <button className="btn btn-outline-light" onClick={onLogout}>Logout</button>
->>>>>>> fbcd7d29bfe529bbd91c1c64d7a17d07cb894126
           </div>
         ) : (
           <div className="d-flex gap-2">
