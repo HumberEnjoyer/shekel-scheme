@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
+// Define the schema for the user model
+// This schema includes fields for username, email, password, wallet address, profile information, and more.
+// It also includes methods for hashing passwords and comparing passwords during login.
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -53,6 +56,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash password before saving
+// This middleware function is executed before saving a user document to the database.
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
@@ -61,9 +65,11 @@ userSchema.pre('save', async function (next) {
 });
 
 // Compare password method
+// This method is used to compare the entered password with the hashed password stored in the database.
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Generate a JWT token method
 const User = mongoose.model('User', userSchema);
 export default User;

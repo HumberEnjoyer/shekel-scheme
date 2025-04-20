@@ -2,9 +2,10 @@ import express from "express";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import User from "../models/userModel.js";
 
+// create a new express router
 const router = express.Router();
 
-// Fetch purchased NFTs
+// route to fetch purchased nfts for the logged-in user
 router.get("/account", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate("purchasedNFTs");
@@ -18,11 +19,12 @@ router.get("/account", verifyToken, async (req, res) => {
   }
 });
 
-// Add funds to the user's account
+// route to add funds to the user's account
 router.put("/funds", verifyToken, async (req, res) => {
   try {
     const amount = Number(req.body.amount);
 
+    // validate the amount provided in the request
     if (isNaN(amount) || amount <= 0) {
       return res.status(400).json({ message: "Invalid amount. Please enter a positive number." });
     }
@@ -32,7 +34,7 @@ router.put("/funds", verifyToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Correctly add the amount without multiplication
+    // add the specified amount to the user's balance
     user.shekelTokens += amount;
     await user.save();
 
@@ -42,7 +44,8 @@ router.put("/funds", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-// Fetch user's balance
+
+// route to fetch the user's balance
 router.get("/balance", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -57,6 +60,7 @@ router.get("/balance", verifyToken, async (req, res) => {
   }
 });
 
+// route to remove an nft from the user's account
 router.put("/remove-nft/:id", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -65,10 +69,12 @@ router.put("/remove-nft/:id", verifyToken, async (req, res) => {
     const nftId = req.params.id;
     const index = user.purchasedNFTs.indexOf(nftId);
 
+    // check if the nft exists in the user's purchased nfts
     if (index === -1) {
       return res.status(400).json({ message: "NFT not found in your account" });
     }
 
+    // remove the nft from the user's purchased nfts
     user.purchasedNFTs.splice(index, 1);
     await user.save();
 
@@ -78,6 +84,5 @@ router.put("/remove-nft/:id", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Failed to remove NFT" });
   }
 });
-
 
 export default router;

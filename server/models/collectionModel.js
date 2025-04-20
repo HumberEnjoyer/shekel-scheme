@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// define the schema for a collection
 const collectionSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -38,18 +39,21 @@ const collectionSchema = new mongoose.Schema({
         default: 0
     }
 }, {
+    // enable timestamps for createdAt and updatedAt fields
     timestamps: true,
+    // enable virtuals for JSON and object outputs
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 });
 
-// Virtual for NFTs in collection
+// define a virtual field for NFTs in the collection
 collectionSchema.virtual('nfts', {
     ref: 'NFT',
     localField: '_id',
     foreignField: 'collection'
 });
 
+// create the collection model using the schema
 const Collection = mongoose.model('Collection', collectionSchema);
 
 export default Collection;

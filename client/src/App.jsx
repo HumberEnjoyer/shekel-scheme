@@ -8,15 +8,29 @@ import AddFunds from "./AddFunds";
 import Comments from "./Comments";
 import Account from "./Account";
 
+// define the base API URL
 const API = "http://localhost:5000";
 
 function App() {
+  // state to manage the current page being displayed
   const [currentPage, setCurrentPage] = useState("home");
+
+  // state to store the selected NFT for purchase
   const [selectedNft, setSelectedNft] = useState(null);
+
+  // state to track if the user is logged in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // state to store the username of the logged-in user
   const [username, setUsername] = useState("");
+
+  // state to store the authentication token
   const [token, setToken] = useState(null);
+
+  // state to store the user's Shekel balance
   const [shekelBalance, setShekelBalance] = useState(0);
+
+  // state to store the list of NFTs
   const [nfts, setNfts] = useState([
     {
       id: 1,
@@ -61,8 +75,11 @@ function App() {
       price: "$95",
     },
   ]);
+
+  // state to manage the loading state for NFTs
   const [loading, setLoading] = useState(true);
 
+  // useEffect to check for a stored user in localStorage on initial render
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser?.token) {
@@ -73,6 +90,7 @@ function App() {
     }
   }, []);
 
+  // useEffect to fetch NFTs from the server on initial render
   useEffect(() => {
     const fetchNFTs = async () => {
       try {
@@ -98,6 +116,7 @@ function App() {
     fetchNFTs();
   }, []);
 
+  // function to fetch the user's Shekel balance
   const fetchShekelBalance = async (tok) => {
     try {
       const res = await fetch(`${API}/api/balance`, {
@@ -110,6 +129,7 @@ function App() {
     }
   };
 
+  // function to handle the creation of a new NFT
   const handleNFTCreated = (newNFT) => {
     setNfts((prev) => [
       ...prev,
@@ -124,11 +144,13 @@ function App() {
     setCurrentPage("home");
   };
 
+  // function to handle the "Buy Now" action for an NFT
   const handleBuyNow = (nft) => {
     setSelectedNft(nft);
     setCurrentPage("buyNow");
   };
 
+  // function to handle user login
   const handleLogin = async ({ email, password }) => {
     try {
       const res = await fetch(`${API}/auth/login`, {
@@ -153,6 +175,7 @@ function App() {
     }
   };
 
+  // function to handle user registration
   const handleRegister = async ({ username, email, password, walletAddress }) => {
     try {
       const res = await fetch(`${API}/auth/register`, {
@@ -173,6 +196,7 @@ function App() {
     }
   };
 
+  // function to handle user logout
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername("");
@@ -181,6 +205,7 @@ function App() {
     setCurrentPage("home");
   };
 
+  // function to render the home page
   const renderHome = () => (
     <div className="px-10 py-10 text-center">
       <h1 className="text-4xl md:text-5xl font-nacelle bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3">
@@ -225,6 +250,7 @@ function App() {
     </div>
   );
 
+  // function to render the current page based on state
   const renderPage = () => {
     switch (currentPage) {
       case "buyNow":
@@ -261,6 +287,7 @@ function App() {
     }
   };
 
+  // render the app with the navbar and current page
   return (
     <div className="min-h-screen bg-[#0f0f1b] text-white">
       <Navbar
@@ -275,6 +302,7 @@ function App() {
   );
 }
 
+// navbar component to display navigation links
 function Navbar({ navigateTo, isLoggedIn, username, balance, onLogout }) {
   return (
     <nav className="w-full flex justify-between items-center p-4 bg-gray-900">

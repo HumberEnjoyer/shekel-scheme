@@ -1,19 +1,28 @@
 import React, { useState } from "react";
 
+// login component to handle user login functionality
 function Login({ onLogin }) {
+  // state to store the email entered by the user
   const [email, setEmail] = useState("");
+
+  // state to store the password entered by the user
   const [password, setPassword] = useState("");
+
+  // state to store error messages
   const [error, setError] = useState("");
 
+  // function to handle form submission for login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // validate that email and password are provided
     if (!email || !password) {
       alert("Email and password are required.");
       return;
     }
 
     try {
+      // send a request to the server to log in the user
       const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -22,6 +31,7 @@ function Login({ onLogin }) {
 
       const data = await response.json();
 
+      // handle success or error response from the server
       if (response.ok) {
         onLogin({ email, password });
       } else {
@@ -33,6 +43,7 @@ function Login({ onLogin }) {
     }
   };
 
+  // render the login form
   return (
     <div className="min-h-screen bg-[#0f0f1b] flex items-center justify-end px-[42.5rem]">
       <div className="w-full max-w-5xl bg-gray-900 p-20 rounded-2xl shadow-2xl">
@@ -40,6 +51,7 @@ function Login({ onLogin }) {
           Welcome back
         </h2>
         <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl ml-auto">
+          {/* input field for email */}
           <div>
             <label htmlFor="email" className="block text-lg font-medium text-gray-300 mb-2">
               Email
@@ -54,6 +66,8 @@ function Login({ onLogin }) {
               required
             />
           </div>
+
+          {/* input field for password */}
           <div>
             <label htmlFor="password" className="block text-lg font-medium text-gray-300 mb-2">
               Password
@@ -68,7 +82,11 @@ function Login({ onLogin }) {
               required
             />
           </div>
+
+          {/* display error message if any */}
           {error && <div className="text-base text-red-400">{error}</div>}
+
+          {/* submit button to log in */}
           <button
             type="submit"
             className="w-full py-4 text-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-lg font-semibold hover:opacity-90 transition"
@@ -76,8 +94,10 @@ function Login({ onLogin }) {
             Sign in
           </button>
         </form>
+
+        {/* link to navigate to the registration page */}
         <div className="mt-10 text-center text-base text-gray-400">
-          Don’t have an account?{' '}
+          Don’t have an account?{" "}
           <span
             className="text-indigo-400 cursor-pointer hover:underline"
             onClick={() => onLogin(null)}

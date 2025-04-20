@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import './collectionModel.js';    
 
+// Import the Collection model to ensure it's registered before using it in the NFT model
 const nftSchema = new mongoose.Schema(
   {
     title:        { type: String, required: true, trim: true },
@@ -30,6 +31,7 @@ const nftSchema = new mongoose.Schema(
   }
 );
 
+// Index for faster queries
 /* ---------- virtual counts ---------- */
 nftSchema.virtual('likesCount', {
   ref: 'Like',
@@ -45,6 +47,7 @@ nftSchema.virtual('commentsCount', {
   count: true,
 });
 
+// Index for faster queries
 /* ---------- helpers ---------- */
 nftSchema.methods.markAsSold = async function (newOwnerId) {
   this.isForSale = false;
@@ -52,6 +55,8 @@ nftSchema.methods.markAsSold = async function (newOwnerId) {
   await this.save();
 };
 
+// Static method to find NFTs for sale
+// This method can be used to get all NFTs that are currently for sale
 nftSchema.statics.findForSale = function () {
   return this.find({ isForSale: true });
 };

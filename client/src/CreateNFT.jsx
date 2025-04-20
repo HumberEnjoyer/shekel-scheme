@@ -1,15 +1,29 @@
 import React, { useState } from 'react';
 
+// create nft component to allow users to create and upload new nfts
 function CreateNFT({ onNFTCreated }) {
+  // state to store the nft title
   const [title, setTitle] = useState('');
+
+  // state to store the nft price
   const [price, setPrice] = useState('');
+
+  // state to store the uploaded image file
   const [image, setImage] = useState(null);
+
+  // state to store the preview of the uploaded image
   const [preview, setPreview] = useState('');
+
+  // state to store error messages
   const [error, setError] = useState('');
+
+  // state to store success messages
   const [success, setSuccess] = useState('');
 
+  // retrieve the logged-in user from local storage
   const user = JSON.parse(localStorage.getItem('user'));
 
+  // function to handle image file selection and preview generation
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -18,14 +32,17 @@ function CreateNFT({ onNFTCreated }) {
     }
   };
 
+  // function to handle the form submission for creating an nft
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // check if the user is logged in
     if (!user || !user.token) {
       setError("You must be logged in to create NFTs.");
       return;
     }
 
+    // prepare form data for the nft creation request
     const formData = new FormData();
     formData.append('title', title);
     formData.append('price', price);
@@ -33,6 +50,7 @@ function CreateNFT({ onNFTCreated }) {
     formData.append('description', 'Auto-generated NFT');
 
     try {
+      // send a request to the server to create the nft
       const response = await fetch('http://localhost:5000/upload/nft', {
         method: 'POST',
         headers: {
@@ -43,6 +61,7 @@ function CreateNFT({ onNFTCreated }) {
 
       const data = await response.json();
 
+      // handle success or error response from the server
       if (response.ok) {
         setSuccess("NFT created successfully!");
         onNFTCreated(data);
@@ -60,6 +79,7 @@ function CreateNFT({ onNFTCreated }) {
     }
   };
 
+  // render the create nft form
   return (
     <div className="min-h-screen bg-[#0f0f1b] flex items-center justify-end px-[42.5rem] py-20">
       <div className="w-full max-w-5xl bg-gray-900 p-16 rounded-2xl shadow-2xl">
@@ -67,6 +87,7 @@ function CreateNFT({ onNFTCreated }) {
           Create New NFT
         </h2>
         <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl ml-auto">
+          {/* input field for nft title */}
           <div>
             <label className="block text-lg font-medium text-gray-300 mb-2">
               Title
@@ -80,6 +101,8 @@ function CreateNFT({ onNFTCreated }) {
               required
             />
           </div>
+
+          {/* input field for nft price */}
           <div>
             <label className="block text-lg font-medium text-gray-300 mb-2">
               Price ($)
@@ -93,6 +116,8 @@ function CreateNFT({ onNFTCreated }) {
               required
             />
           </div>
+
+          {/* input field for nft image */}
           <div>
             <label className="block text-lg font-medium text-gray-300 mb-2">
               NFT Image
@@ -106,6 +131,7 @@ function CreateNFT({ onNFTCreated }) {
             />
           </div>
 
+          {/* preview of the uploaded image */}
           {preview && (
             <div className="text-center">
               <img
@@ -116,9 +142,13 @@ function CreateNFT({ onNFTCreated }) {
             </div>
           )}
 
+          {/* display error message if any */}
           {error && <div className="text-red-400 text-base">{error}</div>}
+
+          {/* display success message if any */}
           {success && <div className="text-green-400 text-base">{success}</div>}
 
+          {/* submit button to create nft */}
           <button
             type="submit"
             className="w-full py-4 text-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-lg font-semibold hover:opacity-90 transition"

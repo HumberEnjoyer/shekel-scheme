@@ -6,30 +6,36 @@ import User from "../models/userModel.js";
 import NFT from "../models/nftModel.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
+// create a new express router
 const router = express.Router();
 
+// define __filename and __dirname for file path operations
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Route to fetch an image file
+// route to fetch an image file
 router.get("/fetch-image", (req, res) => {
   const { filename } = req.query;
 
+  // validate that a filename is provided
   if (!filename) {
     return res.status(400).send("File name is required");
   }
 
-  const safeFilename = path.basename(filename); // Prevent path traversal
+  // sanitize the filename to prevent path traversal
+  const safeFilename = path.basename(filename);
   const filePath = path.join(__dirname, "../uploads", safeFilename);
 
+  // check if the file exists
   if (!fs.existsSync(filePath)) {
     return res.status(404).send("File not found");
   }
 
+  // send the file as a response
   res.sendFile(filePath);
 });
 
-// Route to fetch weather data (example data)
+// route to fetch example weather data
 router.get("/data", (req, res) => {
   const data = {
     coord: {
@@ -75,17 +81,20 @@ router.get("/data", (req, res) => {
     cod: 200,
   };
 
+  // send the weather data as a response
   res.json({ data: data });
 });
 
-// Route to fetch NFTs owned by a user
+// route to fetch NFTs owned by a user
 router.get("/user-nfts", verifyToken, async (req, res) => {
   try {
+    // find the user and populate their owned NFTs
     const user = await User.findById(req.user.id).populate("ownedNFTs");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // send the user's owned NFTs as a response
     res.status(200).json({ ownedNFTs: user.ownedNFTs });
   } catch (error) {
     console.error("Error fetching user NFTs:", error);
@@ -93,9 +102,10 @@ router.get("/user-nfts", verifyToken, async (req, res) => {
   }
 });
 
-// Route to fetch all NFTs for sale
+// route to fetch all NFTs for sale
 router.get("/nfts-for-sale", async (req, res) => {
   try {
+    // find all NFTs that are marked as for sale
     const nftsForSale = await NFT.find({ isForSale: true });
     res.status(200).json({ nfts: nftsForSale });
   } catch (error) {
@@ -104,16 +114,18 @@ router.get("/nfts-for-sale", async (req, res) => {
   }
 });
 
-// Route to fetch details of a specific NFT
+// route to fetch details of a specific NFT
 router.get("/nft/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
+    // find the NFT by its ID and populate its creator and owner details
     const nft = await NFT.findById(id).populate("creator owner");
     if (!nft) {
       return res.status(404).json({ message: "NFT not found" });
     }
 
+    // send the NFT details as a response
     res.status(200).json({ nft });
   } catch (error) {
     console.error("Error fetching NFT details:", error);

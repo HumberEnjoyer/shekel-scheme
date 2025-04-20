@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// Define the schema for a comment
 const commentSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -32,6 +33,7 @@ const commentSchema = new mongoose.Schema({
 // Index for faster queries
 commentSchema.index({ nft: 1, createdAt: -1 });
 
+// Create the model using the schema
 const Comment = mongoose.model('Comment', commentSchema);
 
 export default Comment;
