@@ -5,6 +5,7 @@ import Login from "./Login";
 import Register from "./Register";
 import BuyNow from "./BuyNow";
 import CreateNFT from "./CreateNFT";
+import AddFunds from "./AddFunds"
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
@@ -172,6 +173,25 @@ function App() {
         <CreateNFT onNFTCreated={handleNFTCreated} />
       </>
     );
+  } else if (currentPage === "addFunds") {
+    return (
+      <>
+        <Navbar
+          navigateTo={setCurrentPage}
+          isLoggedIn={isLoggedIn}
+          username={username}
+          balance={shekelBalance}
+          onLogout={handleLogout}
+        />
+        <AddFunds 
+          token={token} 
+          onSuccess={(newBalance) => {
+            setShekelBalance(newBalance);
+            setCurrentPage("home");
+          }} 
+        />
+      </>
+    );
   }
 
   return (
@@ -250,6 +270,12 @@ function Navbar({ navigateTo, isLoggedIn, username, balance, onLogout }) {
               onClick={() => navigateTo("create")}
             >
               Create NFT
+            </button>
+            <button
+              className="btn btn-outline-light me-2"
+              onClick={() => navigateTo("addFunds")}
+            >
+              Add Funds
             </button>
             <button className="btn btn-outline-light" onClick={onLogout}>
               Logout
