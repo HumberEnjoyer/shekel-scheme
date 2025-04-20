@@ -1,98 +1,59 @@
 import mongoose from 'mongoose';
+import './collectionModel.js';    
 
-const nftSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, 'Title is required'],
-    trim: true
+const nftSchema = new mongoose.Schema(
+  {
+    title:        { type: String, required: true, trim: true },
+    description:  { type: String, required: true, trim: true },
+
+    imageUrl:     { type: String, required: true },
+    metadataUrl:  { type: String, required: true },
+
+    creator:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    owner:        { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+
+    /* ------------ reference to a Collection ------------ */
+    collectionRef:{ type: mongoose.Schema.Types.ObjectId, ref: 'Collection', default: null },
+
+    mintedDate:   { type: Date,  default: Date.now },
+    price:        { type: Number, required: true, min: 0 },
+    isForSale:    { type: Boolean, default: false },
+
+    tokenId:      { type: String, required: true, unique: true },
+    contractAddress: { type: String, required: true },
+    blockchain:   { type: String, required: true, enum: ['Ethereum','Polygon','Binance'] },
   },
-  description: {
-    type: String,
-    required: [true, 'Description is required'],
-    trim: true
-  },
-  imageUrl: {
-    type: String,
-    required: [true, 'Image URL is required']
-  },
-  metadataUrl: {
-    type: String,
-    required: [true, 'Metadata URL is required']
-  },
-  creator: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  collectionRef: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Collection'
-  },
-  mintedDate: {
-    type: Date,
-    default: Date.now
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  isForSale: {
-    type: Boolean,
-    default: false
-  },
-  tokenId: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  contractAddress: {
-    type: String,
-    required: true
-  },
-  blockchain: {
-    type: String,
-    required: true,
-    enum: ['Ethereum', 'Polygon', 'Binance']
+  {
+    timestamps: true,
+    toJSON:  { virtuals: true },
+    toObject:{ virtuals: true },
   }
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+);
 
-// Virtual fields
+/* ---------- virtual counts ---------- */
 nftSchema.virtual('likesCount', {
   ref: 'Like',
   localField: '_id',
   foreignField: 'nft',
-  count: true
+  count: true,
 });
 
 nftSchema.virtual('commentsCount', {
   ref: 'Comment',
   localField: '_id',
   foreignField: 'nft',
-  count: true
+  count: true,
 });
 
-// Mark NFT as sold
+/* ---------- helpers ---------- */
 nftSchema.methods.markAsSold = async function (newOwnerId) {
   this.isForSale = false;
-  this.owner = newOwnerId;
+  this.owner     = newOwnerId;
   await this.save();
 };
 
-// Find all NFTs for sale
 nftSchema.statics.findForSale = function () {
   return this.find({ isForSale: true });
 };
 
-const NFT = mongoose.model('NFT', nftSchema);
-
-export default NFT;
+export default mongoose.model('NFT', nftSchema);

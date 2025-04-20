@@ -43,6 +43,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/auth", auth_router); // Authentication routes
 app.use("/fetch", fetch_router); // Fetch routes for files and data
 app.use("/upload", upload_router); // Upload routes for NFTs
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads"))); //Express to return the actual JPEG/PNG when the browser asks for
 app.use("/api", purchase_router); // Purchase routes for buying NFTs
 app.use("/api", account_router); // Account routes for user-related operations
 app.use("/api", comment_router); // Comment routes for NFT comments
@@ -66,5 +67,5 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
