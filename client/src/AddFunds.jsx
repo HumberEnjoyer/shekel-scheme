@@ -51,7 +51,7 @@ function AddFunds({ token, onSuccess }) {
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
                                         min="1"
-                                        requiredd
+                                        required
                                     />
                                 </div>
                                 <button
