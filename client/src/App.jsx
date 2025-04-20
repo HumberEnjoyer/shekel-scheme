@@ -1,72 +1,67 @@
 import React, { useState, useEffect } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Login from "./Login";
 import Register from "./Register";
 import BuyNow from "./BuyNow";
 import CreateNFT from "./CreateNFT";
-import AddFunds from "./AddFunds"
-import Comments from "./Comments"
+import AddFunds from "./AddFunds";
+import Comments from "./Comments";
 
-const API = "http://localhost:3000"; 
+const API = "http://localhost:5000";
+
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedNft, setSelectedNft] = useState(null);
-
-  /* ------------------- authentication / session ------------------- */
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [token, setToken] = useState(null);
   const [shekelBalance, setShekelBalance] = useState(0);
-
-  /* -------------------------- NFT state --------------------------- */
   const [nfts, setNfts] = useState([
     {
       id: 1,
-      _id: "68046a559011bb59bc611b97",     
+      _id: "68046a559011bb59bc611b97",
       title: "Art",
       image: "/cow.png",
-      price: "$50"
+      price: "$50",
     },
     {
       id: 2,
       _id: "68046b4a9011bb59bc611b9f",
       title: "Digital Wonder",
       image: "/duck.png",
-      price: "$70"
+      price: "$70",
     },
     {
       id: 3,
       _id: "68046b639011bb59bc611ba0",
       title: "Modern Portrait",
       image: "/fish.png",
-      price: "$100"
+      price: "$100",
     },
     {
       id: 4,
       _id: "68046b6c9011bb59bc611ba1",
       title: "Zebra",
       image: "/zebra.png",
-      price: "$25"
+      price: "$25",
     },
     {
       id: 5,
       _id: "68046b779011bb59bc611ba2",
       title: "Proboscis",
       image: "/monkey.png",
-      price: "$45"
+      price: "$45",
     },
     {
       id: 6,
       _id: "68046b7f9011bb59bc611ba3",
       title: "Shekel",
       image: "/shekel.png",
-      price: "$95"
-    }
+      price: "$95",
+    },
   ]);
   const [loading, setLoading] = useState(true);
 
-  /* ----------------------- restore session ------------------------ */
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser?.token) {
@@ -77,14 +72,11 @@ function App() {
     }
   }, []);
 
-  /* -------------------- fetch NFTs from server -------------------- */
   useEffect(() => {
     const fetchNFTs = async () => {
       try {
         const res = await fetch(`${API}/upload/nfts`);
-        if (!res.ok) throw new Error("Failed to fetch NFTs");
         const serverNFTs = await res.json();
-
         const formatted = serverNFTs.map((n) => ({
           id: n._id,
           _id: n._id,
@@ -92,12 +84,9 @@ function App() {
           price: `$${n.price}`,
           image: `${API}${n.imageUrl}`,
         }));
-
-        // merge without duplicating existing showcase NFTs
         setNfts((prev) => {
-          const seen = new Set(prev.filter((x) => x._id).map((x) => x._id));
-          const newOnes = formatted.filter((n) => !seen.has(n._id));
-          return [...prev, ...newOnes];
+          const seen = new Set(prev.map((n) => n._id));
+          return [...prev, ...formatted.filter((n) => !seen.has(n._id))];
         });
       } catch (err) {
         console.error("Error fetching NFTs:", err);
@@ -120,7 +109,6 @@ function App() {
     }
   };
 
-  /* ------------------- handlers passed to children ---------------- */
   const handleNFTCreated = (newNFT) => {
     setNfts((prev) => [
       ...prev,
@@ -139,7 +127,6 @@ function App() {
     setSelectedNft(nft);
     setCurrentPage("buyNow");
   };
-  const goBack = () => setCurrentPage("home");
 
   const handleLogin = async ({ email, password }) => {
     try {
@@ -149,14 +136,11 @@ function App() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-
       if (res.ok) {
         setIsLoggedIn(true);
         setUsername(data.username || data.email);
         setToken(data.token);
-        localStorage.setItem("user", JSON.stringify({
-          token: data.token, username: data.username, email: data.email,
-        }));
+        localStorage.setItem("user", JSON.stringify(data));
         setCurrentPage("home");
         fetchShekelBalance(data.token);
       } else {
@@ -168,6 +152,26 @@ function App() {
     }
   };
 
+  const handleRegister = async ({ username, email, password, walletAddress }) => {
+    try {
+      const res = await fetch(`${API}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password, walletAddress }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Registration successful! Please log in.");
+        setCurrentPage("login");
+      } else {
+        alert(data.message || "Registration error");
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      alert("Server error. Please try again later.");
+    }
+  };
+
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername("");
@@ -175,144 +179,131 @@ function App() {
     localStorage.removeItem("user");
     setCurrentPage("home");
   };
-  const handleRegister = () => setCurrentPage("login");
 
-  /* ----------------------------- views ---------------------------- */
-  if (currentPage === "buyNow") {
-    return (
-      <>
-        <Navbar {...{ navigateTo:setCurrentPage,isLoggedIn,username,balance:shekelBalance,onLogout:handleLogout }} />
-        <BuyNow nft={selectedNft} goBack={goBack} isLoggedIn={isLoggedIn} token={token} />
-      </>
-    );
-  }
-  if (currentPage === "login") {
-    return (
-      <>
-        <Navbar {...{ navigateTo:setCurrentPage,isLoggedIn,username,balance:shekelBalance,onLogout:handleLogout }} />
-        <Login onLogin={handleLogin} />
-      </>
-    );
-  }
-  if (currentPage === "register") {
-    return (
-      <>
-        <Navbar {...{ navigateTo:setCurrentPage,isLoggedIn,username,balance:shekelBalance,onLogout:handleLogout }} />
-        <Register onRegister={handleRegister} />
-      </>
-    );
-  }
-  if (currentPage === "create") {
-    return (
-      <>
-        <Navbar {...{ navigateTo:setCurrentPage,isLoggedIn,username,balance:shekelBalance,onLogout:handleLogout }} />
-        <CreateNFT onNFTCreated={handleNFTCreated} />
-      </>
-    );
-  } else if (currentPage === "addFunds") {
-    return (
-      <>
-        <Navbar
-          navigateTo={setCurrentPage}
-          isLoggedIn={isLoggedIn}
-          username={username}
-          balance={shekelBalance}
-          onLogout={handleLogout}
-        />
-        <AddFunds 
-          token={token} 
-          onSuccess={(newBalance) => {
-            setShekelBalance(newBalance);
-            setCurrentPage("home");
-          }} 
-        />
-      </>
-    );
-  }
-
-  /* ---------------------------- home page ------------------------- */
-  return (
-    <>
-      <Navbar {...{ navigateTo:setCurrentPage,isLoggedIn,username,balance:shekelBalance,onLogout:handleLogout }} />
-
-      <div className="main-content-wrapper">
-        <div className="container text-center">
-          <header className="mb-5">
-            <h1 style={{ fontFamily: "'Pacifico', cursive" }}>Shekel Scheme</h1>
-            <p className="lead">NFTs for people with questionable morals.</p>
-
-            {isLoggedIn && (
-              <button className="btn btn-success mb-4" onClick={() => setCurrentPage("create")}>
-                Create New NFT
+  const renderHome = () => (
+    <div className="px-10 py-10 text-center">
+      <h1 className="text-4xl md:text-5xl font-nacelle bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3">
+        Shekel Scheme
+      </h1>
+      <p className="text-indigo-200/70 mb-6">NFTs for people with questionable morals.</p>
+      {isLoggedIn && (
+        <button
+          onClick={() => setCurrentPage("create")}
+          className="inline-flex items-center justify-center px-4 py-2 rounded-lg font-semibold transition duration-300 bg-gradient-to-t from-indigo-600 to-indigo-500 text-white hover:bg-[length:100%_150%] mb-6"
+        >
+          Create New NFT
+        </button>
+      )}
+      {loading ? (
+        <div className="text-indigo-300">Loading NFTs...</div>
+      ) : (
+        <div className="grid gap-x-20 gap-y-20 md:grid-cols-2 lg:grid-cols-3 px-40">
+          {nfts.map((nft) => (
+            <div
+              key={nft.id}
+              className="bg-gray-800 p-10 rounded-2xl shadow-2xl flex flex-col justify-between"
+            >
+              <img
+                src={nft.image}
+                alt={nft.title}
+                className="rounded-md mb-8 w-full h-[22rem] object-cover"
+              />
+              <h3 className="text-3xl font-semibold text-white mb-1">{nft.title}</h3>
+              <p className="text-indigo-200 text-xl mb-3">Price: {nft.price}</p>
+              <button
+                onClick={() => handleBuyNow(nft)}
+                className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition duration-300 bg-gradient-to-t from-indigo-600 to-indigo-500 text-white hover:bg-[length:100%_150%] w-full"
+              >
+                Buy Now
               </button>
-            )}
-          </header>
-
-          {loading ? (
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
+              <Comments nftId={nft._id} token={token} isLoggedIn={isLoggedIn} />
             </div>
-          ) : (
-            <div className="row justify-content-center g-4">
-              {nfts.map((nft) => (
-                <div key={nft.id} className="col-12 col-md-4">
-                  <div className="card h-100 home-hover">
-                    <img src={nft.image} className="card-img-top" alt={nft.title} />
-                    <div className="card-body">
-                      <h5 className="card-title">{nft.title}</h5>
-                      <p className="card-text">Price: {nft.price}</p>
-                      <button className="btn btn-primary w-100 mb-3" onClick={() => handleBuyNow(nft)}>
-                        Buy Now
-                      </button>
-                      <Comments 
-                        nftId={nft._id} 
-                        token={token}
-                        isLoggedIn={isLoggedIn}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          ))}
         </div>
-      </div>
-    </>
+      )}
+    </div>
+  );
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case "buyNow":
+        return <BuyNow nft={selectedNft} goBack={() => setCurrentPage("home")} isLoggedIn={isLoggedIn} token={token} />;
+      case "login":
+        return <Login onLogin={handleLogin} />;
+      case "register":
+        return <Register onRegister={handleRegister} />;
+      case "create":
+        return <CreateNFT onNFTCreated={handleNFTCreated} />;
+      case "addFunds":
+        return <AddFunds token={token} onSuccess={(bal) => { setShekelBalance(bal); setCurrentPage("home"); }} />;
+      default:
+        return renderHome();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0f0f1b] text-white">
+      <Navbar
+        navigateTo={setCurrentPage}
+        isLoggedIn={isLoggedIn}
+        username={username}
+        balance={shekelBalance}
+        onLogout={handleLogout}
+      />
+      {renderPage()}
+    </div>
   );
 }
 
-/* ----------------------------- Navbar ---------------------------- */
 function Navbar({ navigateTo, isLoggedIn, username, balance, onLogout }) {
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100" style={{ padding: "10px 40px" }}>
-      <div className="container-fluid d-flex justify-content-between">
-        <a className="navbar-brand fw-bold" href="#" onClick={() => navigateTo("home")}>Shekel Scheme</a>
-
-        {isLoggedIn ? (
-          <div className="d-flex align-items-center gap-2">
-            <span className="navbar-text text-light me-3">
-              Welcome, {username} | {balance} Shekel Coins
-            </span>
-            <button
-              className="btn btn-outline-light me-2"
-              onClick={() => navigateTo("addFunds")}
-            >
-              Add Funds
-            </button>
-            <button className="btn btn-outline-light me-2" onClick={() => navigateTo("create")}>
-              Create NFT
-            </button>
-            <button className="btn btn-outline-light" onClick={onLogout}>
-              Logout
-            </button>
-          </div>
-        ) : (
-          <div className="d-flex gap-2">
-            <button className="btn btn-outline-light" onClick={() => navigateTo("login")}>Login</button>
-            <button className="btn btn-outline-light" onClick={() => navigateTo("register")}>Register</button>
-          </div>
-        )}
-      </div>
+    <nav className="w-full flex justify-between items-center p-4 bg-gray-900">
+      <span
+        className="text-lg font-bold text-indigo-300 cursor-pointer"
+        onClick={() => navigateTo("home")}
+      >
+        Shekel Scheme
+      </span>
+      {isLoggedIn ? (
+        <div className="flex items-center gap-3">
+          <span className="text-indigo-100 text-sm">
+            Welcome, {username} | {balance} Shekel Coins
+          </span>
+          <button
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-md font-medium text-sm bg-gray-800 text-gray-200 hover:bg-gray-700"
+            onClick={() => navigateTo("addFunds")}
+          >
+            Add Funds
+          </button>
+          <button
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-md font-medium text-sm bg-gray-800 text-gray-200 hover:bg-gray-700"
+            onClick={() => navigateTo("create")}
+          >
+            Create NFT
+          </button>
+          <button
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-md font-medium text-sm bg-gray-800 text-gray-200 hover:bg-gray-700"
+            onClick={onLogout}
+          >
+            Logout
+          </button>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <button
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-md font-medium text-sm bg-gray-800 text-gray-200 hover:bg-gray-700"
+            onClick={() => navigateTo("login")}
+          >
+            Login
+          </button>
+          <button
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-md font-medium text-sm bg-gradient-to-r from-indigo-600 to-indigo-500 text-white hover:opacity-90"
+            onClick={() => navigateTo("register")}
+          >
+            Register
+          </button>
+        </div>
+      )}
     </nav>
   );
 }

@@ -23,7 +23,6 @@ function Login({ onLogin }) {
       const data = await response.json();
 
       if (response.ok) {
-        // Pass back email and password so App.jsx can handle it correctly
         onLogin({ email, password });
       } else {
         setError(data.message || "Login failed");
@@ -35,35 +34,57 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa", width: "100vw" }}>
-      <div className="card shadow p-5" style={{ width: "100%", maxWidth: "600px", borderRadius: "12px" }}>
-        <h2 className="text-center mb-4">Login</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email</label>
+    <div className="min-h-screen bg-[#0f0f1b] flex items-center justify-end px-[42.5rem]">
+      <div className="w-full max-w-5xl bg-gray-900 p-20 rounded-2xl shadow-2xl">
+        <h2 className="text-5xl font-bold text-center text-white mb-12">
+          Welcome back
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl ml-auto">
+          <div>
+            <label htmlFor="email" className="block text-lg font-medium text-gray-300 mb-2">
+              Email
+            </label>
             <input
               type="email"
-              className="form-control"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Your email"
               required
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="password" className="form-label">Password</label>
+          <div>
+            <label htmlFor="password" className="block text-lg font-medium text-gray-300 mb-2">
+              Password
+            </label>
             <input
               type="password"
-              className="form-control"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Your password"
               required
             />
           </div>
-          {error && <div className="alert alert-danger">{error}</div>}
-          <button type="submit" className="btn btn-primary w-100 fs-5">Login</button>
+          {error && <div className="text-base text-red-400">{error}</div>}
+          <button
+            type="submit"
+            className="w-full py-4 text-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-lg font-semibold hover:opacity-90 transition"
+          >
+            Sign in
+          </button>
         </form>
+        <div className="mt-10 text-center text-base text-gray-400">
+          Don’t have an account?{' '}
+          <span
+            className="text-indigo-400 cursor-pointer hover:underline"
+            onClick={() => onLogin(null)}
+          >
+            Sign up
+          </span>
+        </div>
       </div>
     </div>
   );

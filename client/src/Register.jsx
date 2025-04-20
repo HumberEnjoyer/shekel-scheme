@@ -43,33 +43,94 @@ function Register({ onRegister }) {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa", width: "100vw" }}>
-      <div className="card shadow p-5" style={{ width: "100%", maxWidth: "600px", borderRadius: "12px" }}>
-        <h2 className="text-center mb-4">Register</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label">Username</label>
-            <input type="text" className="form-control" value={username} onChange={(e) => setUsername(e.target.value)} required />
+    <div className="min-h-screen bg-[#0f0f1b] flex items-center justify-end px-[42.5rem] py-20">
+      <div className="w-full max-w-5xl bg-gray-900 p-16 rounded-2xl shadow-2xl">
+        <h2 className="text-5xl font-bold text-center text-white mb-12">
+          Create an account
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl ml-auto">
+          <div>
+            <label className="block text-lg font-medium text-gray-300 mb-2">
+              Username
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Your full name"
+              required
+            />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <div>
+            <label className="block text-lg font-medium text-gray-300 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Your email"
+              required
+            />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Wallet Address</label>
-            <input type="text" className="form-control" value={walletAddress} onChange={(e) => setWalletAddress(e.target.value)} required />
+          <div>
+            <label className="block text-lg font-medium text-gray-300 mb-2">
+              Wallet Address
+            </label>
+            <input
+              type="text"
+              value={walletAddress}
+              onChange={(e) => setWalletAddress(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Your wallet address"
+              required
+            />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Password</label>
-            <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <div>
+            <label className="block text-lg font-medium text-gray-300 mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Your password"
+              required
+            />
           </div>
-          <div className="mb-4">
-            <label className="form-label">Confirm Password</label>
-            <input type="password" className="form-control" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+          <div>
+            <label className="block text-lg font-medium text-gray-300 mb-2">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Confirm your password"
+              required
+            />
           </div>
-          {message && <div className="alert alert-info">{message}</div>}
-          <button type="submit" className="btn btn-primary w-100 fs-5">Register</button>
+          {message && <div className="text-base text-indigo-400">{message}</div>}
+          <button
+            type="submit"
+            className="w-full py-4 text-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-lg font-semibold hover:opacity-90 transition"
+          >
+            Register
+          </button>
         </form>
+        <div className="mt-10 text-center text-base text-gray-400">
+          Already have an account?{" "}
+          <span
+            className="text-indigo-400 cursor-pointer hover:underline"
+            onClick={() => onRegister(null)}
+          >
+            Sign in
+          </span>
+        </div>
       </div>
     </div>
   );

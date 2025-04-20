@@ -30,7 +30,7 @@ function CreateNFT({ onNFTCreated }) {
     formData.append('title', title);
     formData.append('price', price);
     formData.append('image', image);
-    formData.append('description', 'Auto-generated NFT'); // default
+    formData.append('description', 'Auto-generated NFT');
 
     try {
       const response = await fetch('http://localhost:5000/upload/nft', {
@@ -61,63 +61,71 @@ function CreateNFT({ onNFTCreated }) {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center mb-4">Create New NFT</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="title" className="form-label">Title</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="price" className="form-label">Price ($)</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="price"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="image" className="form-label">NFT Image</label>
-                  <input
-                    type="file"
-                    className="form-control"
-                    id="image"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    required
-                  />
-                </div>
-                {preview && (
-                  <div className="mb-3 text-center">
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      className="img-fluid"
-                      style={{ maxHeight: '200px' }}
-                    />
-                  </div>
-                )}
-                {error && <div className="alert alert-danger">{error}</div>}
-                {success && <div className="alert alert-success">{success}</div>}
-                <button type="submit" className="btn btn-primary w-100">Create NFT</button>
-              </form>
-            </div>
+    <div className="min-h-screen bg-[#0f0f1b] flex items-center justify-end px-[42.5rem] py-20">
+      <div className="w-full max-w-5xl bg-gray-900 p-16 rounded-2xl shadow-2xl">
+        <h2 className="text-5xl font-bold text-center text-white mb-12">
+          Create New NFT
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl ml-auto">
+          <div>
+            <label className="block text-lg font-medium text-gray-300 mb-2">
+              Title
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Enter NFT title"
+              required
+            />
           </div>
-        </div>
+          <div>
+            <label className="block text-lg font-medium text-gray-300 mb-2">
+              Price ($)
+            </label>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="w-full px-6 py-4 text-lg rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Enter price"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-lg font-medium text-gray-300 mb-2">
+              NFT Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="block w-full text-sm text-gray-400 bg-gray-800 border border-gray-700 rounded-md file:mr-4 file:py-3 file:px-6 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+              required
+            />
+          </div>
+
+          {preview && (
+            <div className="text-center">
+              <img
+                src={preview}
+                alt="Preview"
+                className="max-h-52 mx-auto rounded-lg border border-gray-700"
+              />
+            </div>
+          )}
+
+          {error && <div className="text-red-400 text-base">{error}</div>}
+          {success && <div className="text-green-400 text-base">{success}</div>}
+
+          <button
+            type="submit"
+            className="w-full py-4 text-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-lg font-semibold hover:opacity-90 transition"
+          >
+            Create NFT
+          </button>
+        </form>
       </div>
     </div>
   );

@@ -1,125 +1,43 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+  --font-nacelle: 'Nacelle', sans-serif;
 }
 
 body {
-  margin: 0;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  min-width: 320px;
-  min-height: 100vh;
-  color: rgba(0, 0, 0, 0.87);
+  @apply bg-[#0f0f1b] text-[#e2e8f0];
+  font-family: var(--font-inter);
 }
 
-h1, .card-title {
-  font-weight: 700;
-  font-family: 'Playfair Display', serif;
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-semibold transition duration-300;
 }
 
-p, .card-text {
-  font-family: 'Playfair Display', serif;
+.btn-primary {
+  @apply bg-gradient-to-t from-indigo-600 to-indigo-500 text-white hover:bg-[length:100%_150%];
 }
 
-.app-container {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-
-.navbar {
-  margin-bottom: 20px;
-}
-
-.card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
+.btn-secondary {
+  @apply bg-gray-800 text-gray-300 hover:bg-gray-700;
 }
 
 .card {
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  @apply bg-gray-800 p-4 rounded-xl shadow-md;
 }
 
-.card.home-hover:hover {
-  transform: scale(1.05);
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+.card-img {
+  @apply rounded-md mb-4 w-full h-48 object-cover;
 }
 
-.nft-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
-  justify-content: center;
-  align-items: center;
+.heading-gradient {
+  @apply text-4xl md:text-5xl font-nacelle bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3;
 }
 
-.nft-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.nft-card img {
-  width: 100%;
-  height: auto;
-}
-
-.nft-card p {
-  margin: 10px;
-  font-size: 1rem;
-  color: #333;
-}
-
-.card-img-top {
-  border-radius: 10px 10px 0 0;
-}
-
-.main-content-wrapper {
-  display: flex;
-  justify-content: center;
-  padding: 70px;
-}
-
-.content-container {
-  width: 50%;
-  max-width: 1200px;
-}
-
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f8f9fa;
-  padding: 20px;
-}
-
-.login-content {
-  width: 100%;
-  max-width: 500px;
-}
-
-.login-card {
-  width: 100%;
-  padding: 30px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+.subtext {
+  @apply text-indigo-200/70 mb-6;
 }
