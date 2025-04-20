@@ -6,6 +6,7 @@ import Register from "./Register";
 import BuyNow from "./BuyNow";
 import CreateNFT from "./CreateNFT";
 import AddFunds from "./AddFunds"
+import Comments from "./Comments"
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
@@ -40,7 +41,7 @@ function App() {
 
   const fetchNFTs = async () => {
     try {
-      const res = await fetch("http://localhost:5000/upload/nfts");
+      const res = await fetch("http://localhost:3000/upload/nfts");
       if (res.ok) {
         const userNFTs = await res.json();
         setNfts((prev) => [...prev, ...userNFTs]);
@@ -52,7 +53,7 @@ function App() {
 
   const fetchShekelBalance = async (tok) => {
     try {
-      const res = await fetch("http://localhost:5000/api/balance", {
+      const res = await fetch("http://localhost:3000/api/balance", {
         headers: { Authorization: `Bearer ${tok}` },
       });
       const data = await res.json();
@@ -76,7 +77,7 @@ function App() {
 
   const handleLogin = async ({ email, password }) => {
     try {
-      const res = await fetch("http://localhost:5000/auth/login", {
+      const res = await fetch("http://localhost:3000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -230,11 +231,16 @@ function App() {
                     <h5 className="card-title">{nft.title}</h5>
                     <p className="card-text">Price: {nft.price}</p>
                     <button
-                      className="btn btn-primary w-100"
+                      className="btn btn-primary w-100 mb-3"
                       onClick={() => handleBuyNow(nft)}
                     >
                       Buy Now
                     </button>
+                    <Comments 
+                      nftId={nft.id} 
+                      token={token}
+                      isLoggedIn={isLoggedIn}
+                    />
                   </div>
                 </div>
               </div>
