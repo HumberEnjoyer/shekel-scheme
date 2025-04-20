@@ -57,4 +57,27 @@ router.get("/balance", verifyToken, async (req, res) => {
   }
 });
 
+router.put("/remove-nft/:id", verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const nftId = req.params.id;
+    const index = user.purchasedNFTs.indexOf(nftId);
+
+    if (index === -1) {
+      return res.status(400).json({ message: "NFT not found in your account" });
+    }
+
+    user.purchasedNFTs.splice(index, 1);
+    await user.save();
+
+    res.status(200).json({ message: "NFT removed from account" });
+  } catch (error) {
+    console.error("Error removing NFT:", error);
+    res.status(500).json({ message: "Failed to remove NFT" });
+  }
+});
+
+
 export default router;
