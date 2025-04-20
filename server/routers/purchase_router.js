@@ -5,30 +5,44 @@ import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Purchase an NFT
 router.post("/purchase", verifyToken, async (req, res) => {
   const { nftId } = req.body;
 
   try {
-    // Find the NFT
     const nft = await NFT.findById(nftId);
     if (!nft) {
       return res.status(404).json({ message: "NFT not found" });
     }
 
-    // Check if the user already owns the NFT
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     if (user.purchasedNFTs.includes(nftId)) {
       return res.status(400).json({ message: "You already own this NFT." });
     }
 
-    // Add the NFT to the user's purchased list
-    user.purchasedNFTs.push(nftId);
-    await user.save();
+    if (user.shekelTokens < nft.price) {
+      return res.status(400).json({ message: "Insufficient Shekel Coins." });
+    }
 
-    res.status(200).json({ message: "Purchase successful", nft });
+    user.shekelTokens -= nft.price;
+    nft.owner = user._id;
+    nft.isForSale = false;
+
+    user.purchasedNFTs.push(nft._id);
+
+    await user.save();
+    await nft.save();
+
+    res.status(200).json({ 
+      message: "Purchase successful", 
+      balance: user.shekelTokens,
+      nft 
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error processing purchase:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

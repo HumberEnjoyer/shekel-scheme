@@ -1,12 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function BuyNow({ nft, goBack, isLoggedIn, token }) {
+function BuyNow({ nft, goBack, isLoggedIn, token, balance, onSuccess }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isAffordable, setIsAffordable] = useState(false); // <-- Add this line
+
+  useEffect(() => {
+    if (nft?.price && balance !== undefined) {
+      const numericPrice = Number(nft.price.replace("$", ""));
+      setIsAffordable(balance >= numericPrice);
+    }
+  }, [balance, nft]);
 
   const handlePurchase = async () => {
+    setError("");
+    setSuccess("");
+
     if (!isLoggedIn || !token) {
-      setError("You must be logged in to make a purchase.");
+      setError("You must be logged in.");
+      return;
+    }
+
+    if (!isAffordable) {
+      setError("Insufficient balance.");
       return;
     }
 
@@ -24,23 +40,23 @@ function BuyNow({ nft, goBack, isLoggedIn, token }) {
 
       if (res.ok) {
         setSuccess("Purchase successful!");
-        setError("");
+        if (data.balance !== undefined && onSuccess) {
+          onSuccess(data.balance);
+        }
       } else {
-        setError(data.message || "Failed to purchase NFT.");
-        setSuccess("");
+        setError(data.message || "Purchase failed.");
       }
     } catch (err) {
-      console.error("Error purchasing NFT:", err);
-      setError("Something went wrong. Try again later.");
-      setSuccess("");
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     }
   };
 
   if (!nft) return <div className="text-center mt-10 text-indigo-300">No NFT selected.</div>;
 
   return (
-<div className="min-h-screen flex items-center justify-center bg-[#0f0f1b] px-60 text-white">
-<div className="pl-[190px] w-full">
+    <div className="min-h-screen flex items-center justify-center bg-[#0f0f1b] px-60 text-white">
+      <div className="pl-[190px] w-full">
         <div className="w-full max-w-7xl bg-gray-900 p-20 rounded-3xl shadow-2xl">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <img
@@ -52,24 +68,27 @@ function BuyNow({ nft, goBack, isLoggedIn, token }) {
               <h2 className="text-5xl font-bold text-white text-left">{nft.title}</h2>
               <p className="text-indigo-300 text-2xl text-left">Price: {nft.price}</p>
 
-              {error && <div className="text-red-400 text-lg text-left">{error}</div>}
-              {success && <div className="text-green-400 text-lg text-left">{success}</div>}
+              {error && <div className="text-red-400 text-lg">{error}</div>}
+              {success && <div className="text-green-400 text-lg">{success}</div>}
 
-              <div className="space-y-6">
-                <button
-                  className="w-full py-6 rounded-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold hover:opacity-90 transition text-xl"
-                  onClick={handlePurchase}
-                >
-                  Confirm Purchase
-                </button>
+              <button
+                className={`w-full py-6 rounded-lg text-xl text-white font-semibold transition ${
+                  isAffordable
+                    ? "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:opacity-90"
+                    : "bg-gray-600 cursor-not-allowed"
+                }`}
+                disabled={!isAffordable}
+                onClick={handlePurchase}
+              >
+                {isAffordable ? "Confirm Purchase" : "Insufficient Balance"}
+              </button>
 
-                <button
-                  className="w-full py-6 rounded-lg text-white bg-gray-800 hover:bg-gray-700 font-medium transition text-xl"
-                  onClick={goBack}
-                >
-                  Go Back
-                </button>
-              </div>
+              <button
+                className="w-full py-6 rounded-lg text-xl text-white bg-gray-800 hover:bg-gray-700"
+                onClick={goBack}
+              >
+                Go Back
+              </button>
             </div>
           </div>
         </div>

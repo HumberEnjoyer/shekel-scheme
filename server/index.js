@@ -30,7 +30,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:3000", // Replace with your frontend's URL
+  origin: "http://localhost:3000",
   credentials: true,
 }));
 app.use(express.json());

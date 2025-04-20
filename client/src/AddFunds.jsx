@@ -9,14 +9,21 @@ function AddFunds({ token, onSuccess }) {
     e.preventDefault();
     setLoading(true);
 
+    const numericAmount = Number(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      setMessage("Please enter a valid amount");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`http://localhost:5000/api/account/funds`, {
-        method: "POST",
+      const response = await fetch("http://localhost:5000/api/funds", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ amount: Number(amount) }),
+        body: JSON.stringify({ amount: numericAmount }),
       });
 
       const data = await response.json();
@@ -24,12 +31,12 @@ function AddFunds({ token, onSuccess }) {
       if (response.ok) {
         setMessage("Funds added successfully!");
         setAmount("");
-        if (onSuccess) onSuccess(data.newBalance);
+        if (onSuccess) onSuccess(data.balance);
       } else {
         setMessage(data.message || "Error adding funds");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error adding funds:", error);
       setMessage("Error adding funds");
     } finally {
       setLoading(false);
@@ -38,11 +45,10 @@ function AddFunds({ token, onSuccess }) {
 
   return (
     <div className="min-h-screen bg-[#0f0f1b] flex items-center justify-end px-[45rem] py-20 text-white">
-      <div className="w-full max-w-5xl bg-gray-900 p-16 rounded-2xl shadow-2xl">
-        <h2 className="text-5xl font-bold text-center mb-12 text-white">
-          Add Funds
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl ml-auto">
+
+      <div className="w-full max-w-xl bg-gray-900 p-16 rounded-2xl shadow-2xl">
+        <h2 className="text-5xl font-bold text-center mb-12">Add Funds</h2>
+        <form onSubmit={handleSubmit} className="space-y-8">
           <div>
             <label className="block text-lg font-medium text-gray-300 mb-2">
               Amount (Shekel Tokens)

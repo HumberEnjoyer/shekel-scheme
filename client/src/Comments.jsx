@@ -7,7 +7,7 @@ function Comments({ nftId, token, isLoggedIn }) {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/nft/${nftId}/comments`);
+      const response = await fetch(`http://localhost:5000/api/nft/${nftId}/comments`);
       if (response.ok) {
         const data = await response.json();
         setComments(data);
@@ -27,7 +27,7 @@ function Comments({ nftId, token, isLoggedIn }) {
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/api/nft/${nftId}/comments`, {
+      const response = await fetch(`http://localhost:5000/api/nft/${nftId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,13 +36,16 @@ function Comments({ nftId, token, isLoggedIn }) {
         body: JSON.stringify({ text: newComment }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
         setComments((prev) => [data, ...prev]);
         setNewComment('');
+      } else {
+        console.error("Error posting comment:", data.message || "Unknown error");
       }
     } catch (error) {
-      console.error('Error posting comment:', error);
+      console.error("Error posting comment:", error);
     } finally {
       setLoading(false);
     }
@@ -50,7 +53,7 @@ function Comments({ nftId, token, isLoggedIn }) {
 
   const handleDelete = async (commentId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/comments/${commentId}`, {
+      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -62,6 +65,13 @@ function Comments({ nftId, token, isLoggedIn }) {
       console.error('Error deleting comment:', error);
     }
   };
+
+  // Decode token if stored as string (temporary logic for checking userId)
+  let currentUserId = null;
+  try {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (storedUser?.userId) currentUserId = storedUser.userId;
+  } catch (e) {}
 
   return (
     <div className="mt-6">
@@ -91,23 +101,23 @@ function Comments({ nftId, token, isLoggedIn }) {
         {comments.length === 0 ? (
           <p className="text-sm text-gray-500">No comments yet</p>
         ) : (
-          comments.map((comment) => (
-            <div key={comment._id} className="bg-gray-800 p-4 rounded-xl shadow-sm">
-              <div className="flex justify-between text-sm text-gray-400 mb-2">
-                <span>{comment.user.username}</span>
-                <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
-              </div>
-              <p className="text-white">{comment.text}</p>
-              {token?.userId === comment.user._id && (
-                <button
-                  className="mt-3 text-sm text-red-400 hover:underline"
-                  onClick={() => handleDelete(comment._id)}
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          ))
+            comments.map((comment) => (
+                <div key={comment._id} className="bg-gray-800 p-4 rounded-xl shadow-sm">
+                  <div className="flex justify-between text-sm text-gray-400 mb-2">
+                    <span>{comment.user?.username || "Deleted User"}</span>
+                    <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <p className="text-white">{comment.text}</p>
+                  {currentUserId === comment.user?._id && (
+                    <button
+                      className="mt-3 text-sm text-red-400 hover:underline"
+                      onClick={() => handleDelete(comment._id)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              ))
         )}
       </div>
     </div>

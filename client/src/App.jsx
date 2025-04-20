@@ -6,6 +6,7 @@ import BuyNow from "./BuyNow";
 import CreateNFT from "./CreateNFT";
 import AddFunds from "./AddFunds";
 import Comments from "./Comments";
+import Account from "./Account";
 
 const API = "http://localhost:5000";
 
@@ -227,7 +228,16 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case "buyNow":
-        return <BuyNow nft={selectedNft} goBack={() => setCurrentPage("home")} isLoggedIn={isLoggedIn} token={token} />;
+        return (
+          <BuyNow
+            nft={selectedNft}
+            goBack={() => setCurrentPage("home")}
+            isLoggedIn={isLoggedIn}
+            token={token}
+            balance={shekelBalance}
+            onSuccess={(newBalance) => setShekelBalance(newBalance)}
+          />
+        );
       case "login":
         return <Login onLogin={handleLogin} />;
       case "register":
@@ -235,7 +245,17 @@ function App() {
       case "create":
         return <CreateNFT onNFTCreated={handleNFTCreated} />;
       case "addFunds":
-        return <AddFunds token={token} onSuccess={(bal) => { setShekelBalance(bal); setCurrentPage("home"); }} />;
+        return (
+          <AddFunds
+            token={token}
+            onSuccess={(bal) => {
+              setShekelBalance(bal);
+              setCurrentPage("home");
+            }}
+          />
+        );
+      case "account":
+        return <Account user={{ username, shekelTokens: shekelBalance, token }} />;
       default:
         return renderHome();
     }
@@ -269,6 +289,12 @@ function Navbar({ navigateTo, isLoggedIn, username, balance, onLogout }) {
           <span className="text-indigo-100 text-sm">
             Welcome, {username} | {balance} Shekel Coins
           </span>
+          <button
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-md font-medium text-sm bg-gray-800 text-gray-200 hover:bg-gray-700"
+            onClick={() => navigateTo("account")}
+          >
+            Account
+          </button>
           <button
             className="inline-flex items-center justify-center px-3 py-1.5 rounded-md font-medium text-sm bg-gray-800 text-gray-200 hover:bg-gray-700"
             onClick={() => navigateTo("addFunds")}
