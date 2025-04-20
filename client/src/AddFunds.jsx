@@ -8,7 +8,7 @@ function AddFunds({ token, onSuccess }) {
         setLoading(true);
 
         try {
-            const response = await fetch(`http://localhost:3000/api/account/funds`, {
+            const response = await fetch(`http://localhost:5000/api/account/funds`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -69,3 +69,5 @@ function AddFunds({ token, onSuccess }) {
         </div>
     );
 }
+
+export default AddFunds;
