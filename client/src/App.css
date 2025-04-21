@@ -4,14 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-inter: 'Inter', sans-serif;
-  --font-nacelle: 'Nacelle', sans-serif;
-}
-
 body {
   @apply bg-[#0f0f1b] text-[#e2e8f0];
-  font-family: var(--font-inter);
+  font-family: sans-serif; /* Removed the custom font variable */
 }
 
 .btn {
@@ -35,7 +30,7 @@ body {
 }
 
 .heading-gradient {
-  @apply text-4xl md:text-5xl font-nacelle bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3;
+  @apply text-4xl md:text-5xl bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3;
 }
 
 .subtext {

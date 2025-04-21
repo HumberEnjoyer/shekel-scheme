@@ -208,7 +208,7 @@ function App() {
   // function to render the home page
   const renderHome = () => (
     <div className="px-10 py-10 text-center">
-      <h1 className="text-4xl md:text-5xl font-nacelle bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3">
+      <h1 className="text-4xl md:text-5xl bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3">
         Shekel Scheme
       </h1>
       <p className="text-indigo-200/70 mb-6">NFTs for people with questionable morals.</p>

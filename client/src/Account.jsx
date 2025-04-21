@@ -68,7 +68,7 @@ function Account({ user }) {
   // render the purchased nfts or a message if no nfts are owned
   return (
     <div className="min-h-screen px-20 py-16 bg-[#0f0f1b] text-white">
-      <h1 className="text-5xl font-nacelle bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-4 text-center">
+      <h1 className="text-5xl bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-4 text-center">
         Your Purchased NFTs
       </h1>
       <p className="text-indigo-200/70 mb-10 text-center text-lg">These are NFTs you now own.</p>
