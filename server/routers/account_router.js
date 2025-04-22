@@ -1,6 +1,7 @@
 import express from "express";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import User from "../models/userModel.js";
+import NFT from "../models/nftModel.js";
 
 // create a new express router
 const router = express.Router();
@@ -8,13 +9,15 @@ const router = express.Router();
 // route to fetch purchased nfts for the logged-in user
 router.get("/account", verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("purchasedNFTs");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const user = await User.findById(req.user.id).populate({
+      path: "purchasedNFTs",
+      match: { isForSale: false },      // 🔑  hide relisted items
+    });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
     res.status(200).json({ purchasedNFTs: user.purchasedNFTs });
-  } catch (error) {
-    console.error("Error fetching purchased NFTs:", error);
+  } catch (err) {
+    console.error("Error fetching purchased NFTs:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -84,5 +87,38 @@ router.put("/remove-nft/:id", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Failed to remove NFT" });
   }
 });
+
+router.put("/relist-nft/:id", verifyToken, async (req, res) => {
+  try {
+    const nft = await NFT.findById(req.params.id);
+    if (!nft) return res.status(404).json({ message: "NFT not found" });
+
+    if (String(nft.owner) !== req.user.id)
+      return res.status(403).json({ message: "Not authorised" });
+
+    /* optional new price */
+    if (req.body.price !== undefined) {
+      const newPrice = Number(req.body.price);
+      if (isNaN(newPrice) || newPrice <= 0)
+        return res.status(400).json({ message: "Invalid price" });
+      nft.price = newPrice;
+    }
+
+    nft.isForSale = true;
+    await nft.save();
+
+    /* pull the NFT out of seller.purchasedNFTs so it no longer
+       shows up in “Account” while listed */
+    await User.findByIdAndUpdate(req.user.id, {
+      $pull: { purchasedNFTs: nft._id },
+    });
+
+    res.status(200).json({ message: "NFT relisted", nft });
+  } catch (err) {
+    console.error("Error relisting NFT:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 export default router;

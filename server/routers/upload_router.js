@@ -59,18 +59,16 @@ router.post('/nft', verifyToken, upload.single('image'), async (req, res) => {
   }
 });
 
-router.get('/nfts', async (_req, res) => {
-  // define a get route for fetching all nfts
+router.get("/nfts", async (_req, res) => {
   try {
-    const nfts = await NFT.find().populate('creator owner collectionRef');
-    // fetch all nfts and populate related fields
-
+    // ONLY return items that are still for sale
+    const nfts = await NFT.find({ isForSale: true }).populate(
+      "creator owner collectionRef"
+    );
     res.status(200).json(nfts);
-    // respond with the list of nfts
   } catch (error) {
-    console.error('Error fetching NFTs:', error);
-    res.status(500).json({ error: 'Failed to fetch NFTs' });
-    // handle any server errors
+    console.error("Error fetching NFTs:", error);
+    res.status(500).json({ error: "Failed to fetch NFTs" });
   }
 });
 

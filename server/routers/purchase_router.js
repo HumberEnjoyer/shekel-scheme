@@ -4,64 +4,52 @@ import NFT from "../models/nftModel.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-// create a new express router instance for handling purchase-related routes
 
+// ───────────────────────────────────────────────────────────────
+// Purchase an NFT – can only succeed while the NFT is “for sale”
+// ───────────────────────────────────────────────────────────────
 router.post("/purchase", verifyToken, async (req, res) => {
-  // define a post route for purchasing an nft, requiring token verification
   const { nftId } = req.body;
-  // extract the nft id from the request body
 
   try {
     const nft = await NFT.findById(nftId);
-    // fetch the nft by its id from the database
+    if (!nft)           return res.status(404).json({ message: "NFT not found" });
+    if (!nft.isForSale) return res.status(400).json({ message: "NFT already sold" });
 
-    if (!nft) {
-      return res.status(404).json({ message: "NFT not found" });
-    }
-    // return a 404 error if the nft does not exist
+    const buyer  = await User.findById(req.user.id);
+    const seller = await User.findById(nft.owner);
 
-    const user = await User.findById(req.user.id);
-    // fetch the user making the purchase by their id from the token
-
-    if (!user) {
+    if (!buyer || !seller)
       return res.status(404).json({ message: "User not found" });
-    }
-    // return a 404 error if the user does not exist
 
-    if (user.purchasedNFTs.includes(nftId)) {
+    if (buyer._id.equals(seller._id))
       return res.status(400).json({ message: "You already own this NFT." });
-    }
-    // return a 400 error if the user already owns the nft
 
-    if (user.shekelTokens < nft.price) {
+    if (buyer.shekelTokens < nft.price)
       return res.status(400).json({ message: "Insufficient Shekel Coins." });
-    }
-    // return a 400 error if the user does not have enough tokens to purchase the nft
 
-    user.shekelTokens -= nft.price;
-    // deduct the nft price from the user's token balance
+    /* ─── handle balances ─── */
+    buyer.shekelTokens  -= nft.price;
+    seller.shekelTokens += nft.price;
 
-    nft.owner = user._id;
+    /* ─── transfer ownership ─── */
+    nft.owner     = buyer._id;
     nft.isForSale = false;
-    // update the nft's owner and mark it as no longer for sale
 
-    user.purchasedNFTs.push(nft._id);
-    // add the nft to the user's list of purchased nfts
+    /* ─── move NFT between user arrays ─── */
+    buyer.purchasedNFTs.push(nft._id);
+    await seller.updateOne({ $pull: { purchasedNFTs: nft._id } });
 
-    await user.save();
-    await nft.save();
-    // save the updated user and nft data to the database
+    await Promise.all([buyer.save(), seller.save(), nft.save()]);
 
-    res.status(200).json({ 
-      message: "Purchase successful", 
-      balance: user.shekelTokens,
-      nft 
+    res.status(200).json({
+      message: "Purchase successful",
+      balance: buyer.shekelTokens,
+      nft,
     });
-    // respond with a success message, the user's updated balance, and the purchased nft
-  } catch (error) {
-    console.error("Error processing purchase:", error);
+  } catch (err) {
+    console.error("Error processing purchase:", err);
     res.status(500).json({ message: "Server error" });
-    // handle any server errors and respond with a 500 status code
   }
 });
 

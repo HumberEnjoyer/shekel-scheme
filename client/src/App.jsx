@@ -1,36 +1,26 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import Login from "./Login";
-import Register from "./Register";
-import BuyNow from "./BuyNow";
-import CreateNFT from "./CreateNFT";
-import AddFunds from "./AddFunds";
-import Comments from "./Comments";
-import Account from "./Account";
 
-// define the base API URL
+import Login     from "./Login";
+import Register  from "./Register";
+import BuyNow    from "./BuyNow";
+import CreateNFT from "./CreateNFT";
+import AddFunds  from "./AddFunds";
+import Comments  from "./Comments";
+import Account   from "./Account";
+
 const API = "http://localhost:5000";
 
 function App() {
-  // state to manage the current page being displayed
+  /* ───────── state ───────── */
   const [currentPage, setCurrentPage] = useState("home");
-
-  // state to store the selected NFT for purchase
   const [selectedNft, setSelectedNft] = useState(null);
 
-  // state to track if the user is logged in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // state to store the username of the logged-in user
-  const [username, setUsername] = useState("");
-
-  // state to store the authentication token
-  const [token, setToken] = useState(null);
-
-  // state to store the user's Shekel balance
+  const [username,   setUsername]   = useState("");
+  const [token,      setToken]      = useState(null);
   const [shekelBalance, setShekelBalance] = useState(0);
 
-  // state to store the list of NFTs
   const [nfts, setNfts] = useState([
     {
       id: 1,
@@ -75,51 +65,46 @@ function App() {
       price: "$95",
     },
   ]);
-
-  // state to manage the loading state for NFTs
   const [loading, setLoading] = useState(true);
 
-  // useEffect to check for a stored user in localStorage on initial render
+  /* ───────── restore auth ───────── */
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser?.token) {
+    const stored = JSON.parse(localStorage.getItem("user"));
+    if (stored?.token) {
       setIsLoggedIn(true);
-      setUsername(storedUser.username || storedUser.email);
-      setToken(storedUser.token);
-      fetchShekelBalance(storedUser.token);
+      setUsername(stored.username || stored.email);
+      setToken(stored.token);
+      fetchShekelBalance(stored.token);
     }
   }, []);
 
-  // useEffect to fetch NFTs from the server on initial render
+  /* ───────── fetch NFTs for sale ───────── */
   useEffect(() => {
-    const fetchNFTs = async () => {
+    const load = async () => {
       try {
-        const res = await fetch(`${API}/upload/nfts`);
-        const serverNFTs = await res.json();
-        const formatted = serverNFTs.map((n) => ({
+        const res  = await fetch(`${API}/upload/nfts`);
+        const list = await res.json();
+        const formatted = list.map((n) => ({
           id: n._id,
           _id: n._id,
           title: n.title,
           price: `$${n.price}`,
           image: `${API}${n.imageUrl}`,
         }));
-        setNfts((prev) => {
-          const seen = new Set(prev.map((n) => n._id));
-          return [...prev, ...formatted.filter((n) => !seen.has(n._id))];
-        });
+        setNfts(formatted);
       } catch (err) {
         console.error("Error fetching NFTs:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchNFTs();
+    load();
   }, []);
 
-  // function to fetch the user's Shekel balance
+  /* ───────── helpers ───────── */
   const fetchShekelBalance = async (tok) => {
     try {
-      const res = await fetch(`${API}/api/balance`, {
+      const res  = await fetch(`${API}/api/balance`, {
         headers: { Authorization: `Bearer ${tok}` },
       });
       const data = await res.json();
@@ -129,74 +114,65 @@ function App() {
     }
   };
 
-  // function to handle the creation of a new NFT
   const handleNFTCreated = (newNFT) => {
-    setNfts((prev) => [
-      ...prev,
-      {
-        id: newNFT._id,
-        _id: newNFT._id,
-        title: newNFT.title,
-        price: `$${newNFT.price}`,
-        image: `${API}${newNFT.imageUrl}`,
-      },
-    ]);
+    if (newNFT.isForSale) {
+      setNfts((prev) => [
+        ...prev,
+        {
+          id: newNFT._id,
+          _id: newNFT._id,
+          title: newNFT.title,
+          price: `$${newNFT.price}`,
+          image: `${API}${newNFT.imageUrl}`,
+        },
+      ]);
+    }
     setCurrentPage("home");
   };
 
-  // function to handle the "Buy Now" action for an NFT
   const handleBuyNow = (nft) => {
     setSelectedNft(nft);
     setCurrentPage("buyNow");
   };
 
-  // function to handle user login
   const handleLogin = async ({ email, password }) => {
     try {
-      const res = await fetch(`${API}/auth/login`, {
+      const res  = await fetch(`${API}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (res.ok) {
-        setIsLoggedIn(true);
-        setUsername(data.username || data.email);
-        setToken(data.token);
-        localStorage.setItem("user", JSON.stringify(data));
-        setCurrentPage("home");
-        fetchShekelBalance(data.token);
-      } else {
-        alert(data.message || "Invalid username or password");
-      }
+      if (!res.ok) return alert(data.message || "Invalid credentials");
+      setIsLoggedIn(true);
+      setUsername(data.username || data.email);
+      setToken(data.token);
+      localStorage.setItem("user", JSON.stringify(data));
+      setCurrentPage("home");
+      fetchShekelBalance(data.token);
     } catch (err) {
       console.error("Login error:", err);
       alert("Server error. Please try again later.");
     }
   };
 
-  // function to handle user registration
-  const handleRegister = async ({ username, email, password, walletAddress }) => {
+  const handleRegister = async (form) => {
     try {
-      const res = await fetch(`${API}/auth/register`, {
+      const res  = await fetch(`${API}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, walletAddress }),
+        body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (res.ok) {
-        alert("Registration successful! Please log in.");
-        setCurrentPage("login");
-      } else {
-        alert(data.message || "Registration error");
-      }
+      if (!res.ok) return alert(data.message || "Registration error");
+      alert("Registration successful! Please log in.");
+      setCurrentPage("login");
     } catch (err) {
       console.error("Registration error:", err);
       alert("Server error. Please try again later.");
     }
   };
 
-  // function to handle user logout
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername("");
@@ -205,15 +181,23 @@ function App() {
     setCurrentPage("home");
   };
 
-  // function to render the home page
+  /* Remove NFT from the home feed after purchase */
+  const handlePurchased = (nftId) => {
+    setNfts((prev) => prev.filter((n) => n._id !== nftId));
+    setCurrentPage("account");
+  };
+
+  /* ───────── UI sections ───────── */
   const renderHome = () => (
     <div className="px-10 py-10 text-center">
-      <h1 className="text-4xl md:text-5xl bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3 text-white "
-      style={{ fontFamily: '"Pacifico", cursive' }}>
-        
+      <h1
+        className="text-4xl md:text-5xl bg-gradient-to-r from-indigo-500 to-indigo-200 text-transparent bg-clip-text mb-3"
+        style={{ fontFamily: '"Pacifico", cursive' }}
+      >
         Shekel Scheme
       </h1>
       <p className="text-indigo-200/70 mb-6">NFTs for people with no morals.</p>
+
       {isLoggedIn && (
         <button
           onClick={() => setCurrentPage("create")}
@@ -222,37 +206,47 @@ function App() {
           Create New NFT
         </button>
       )}
+
       {loading ? (
         <div className="text-indigo-300">Loading NFTs...</div>
       ) : (
-        <div className="grid gap-x-20 gap-y-20 md:grid-cols-2 lg:grid-cols-3 px-40">
-          {nfts.map((nft) => (
-            <div
-              key={nft.id}
-              className="bg-gray-800 p-10 rounded-2xl shadow-2xl flex flex-col justify-between"
-            >
-              <img
-                src={nft.image}
-                alt={nft.title}
-                className="rounded-md mb-8 w-full h-[22rem] object-cover"
-              />
-              <h3 className="text-3xl font-semibold text-white mb-1">{nft.title}</h3>
-              <p className="text-indigo-200 text-xl mb-3">Price: {nft.price}</p>
-              <button
-                onClick={() => handleBuyNow(nft)}
-                className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition duration-300 bg-gradient-to-t from-indigo-600 to-indigo-500 text-white hover:bg-[length:100%_150%] w-full"
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="group mx-auto grid max-w-sm items-start gap-6 lg:max-w-none lg:grid-cols-3">
+            {nfts.map((nft) => (
+              <div
+                key={nft.id}
+                className="bg-gray-800 p-10 rounded-2xl shadow-2xl flex flex-col justify-between"
               >
-                Buy Now
-              </button>
-              <Comments nftId={nft._id} token={token} isLoggedIn={isLoggedIn} />
-            </div>
-          ))}
+                <img
+                  src={nft.image}
+                  alt={nft.title}
+                  className="rounded-md mb-8 w-full h-[22rem] object-cover"
+                />
+                <h3 className="text-3xl font-semibold text-white mb-1">
+                  {nft.title}
+                </h3>
+                <p className="text-indigo-200 text-xl mb-3">
+                  Price: {nft.price}
+                </p>
+                <button
+                  onClick={() => handleBuyNow(nft)}
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition duration-300 bg-gradient-to-t from-indigo-600 to-indigo-500 text-white hover:bg-[length:100%_150%] w-full"
+                >
+                  Buy Now
+                </button>
+                <Comments
+                  nftId={nft._id}
+                  token={token}
+                  isLoggedIn={isLoggedIn}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 
-  // function to render the current page based on state
   const renderPage = () => {
     switch (currentPage) {
       case "buyNow":
@@ -263,7 +257,8 @@ function App() {
             isLoggedIn={isLoggedIn}
             token={token}
             balance={shekelBalance}
-            onSuccess={(newBalance) => setShekelBalance(newBalance)}
+            onSuccess={(bal) => setShekelBalance(bal)}
+            onPurchased={handlePurchased}
           />
         );
       case "login":
@@ -283,13 +278,17 @@ function App() {
           />
         );
       case "account":
-        return <Account user={{ username, shekelTokens: shekelBalance, token }} />;
+        return (
+          <Account
+            user={{ username, shekelTokens: shekelBalance, token }}
+            onRelist={(nft) => setNfts((prev) => [...prev, nft])}
+          />
+        );
       default:
         return renderHome();
     }
   };
 
-  // render the app with the navbar and current page
   return (
     <div className="min-h-screen bg-[#0f0f1b] text-white">
       <Navbar
@@ -304,67 +303,66 @@ function App() {
   );
 }
 
-// navbar component to display navigation links
+/* ───────── Navbar ───────── */
 function Navbar({ navigateTo, isLoggedIn, username, balance, onLogout }) {
   return (
-    <nav className="z-30 mt-2 w-full md:mt-5 pt-2">
+    <nav className="z-30 w-full pt-2">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-      <div className="relative flex h-21 items-center justify-between gap-3 rounded-2xl bg-gray-900/90 px-3 before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:border before:border-transparent before:[background:linear-gradient(to_right,var(--color-gray-800),var(--color-gray-700),var(--color-gray-800))_border-box] before:[mask-composite:exclude_!important] before:[mask:linear-gradient(white_0_0)_padding-box,_linear-gradient(white_0_0)] after:absolute after:inset-0 after:-z-10 after:backdrop-blur-xs mt-5" >
-      <span
-        className="flex flex-1 items-center justify-start gap-3 text-lg font-bold text-indigo-300 cursor-pointer"
-        onClick={() => navigateTo("home")}
-      >
-        Shekel Scheme
-      </span>
-
-      {isLoggedIn ? (
-        <div className="flex flex-1 items-center justify-end gap-3 ">
-          <span className="text-indigo-100 text-sm ">
-            Welcome, {username} | {balance} Shekel Coins
+        <div className="relative flex h-21 items-center justify-between gap-3 rounded-2xl bg-gray-900/90 px-3 mt-5">
+          <span
+            className="flex flex-1 items-center justify-start gap-3 text-lg font-bold text-indigo-300 cursor-pointer"
+            onClick={() => navigateTo("home")}
+          >
+            Shekel Scheme
           </span>
-          <button
-            className="btn-sm relative bg-linear-to-b from-gray-800 to-gray-800/60 bg-[length:100%_100%] bg-[bottom] py-[5px] text-gray-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:border before:border-transparent before:[background:linear-gradient(to_right,var(--color-gray-800),var(--color-gray-700),var(--color-gray-800))_border-box] before:[mask-composite:exclude_!important] before:[mask:linear-gradient(white_0_0)_padding-box,_linear-gradient(white_0_0)] hover:bg-[length:100%_150%]"
-            onClick={() => navigateTo("account")}
-          >
-            Account
-          </button>
-          <button
-            className="btn-sm relative bg-linear-to-b from-gray-800 to-gray-800/60 bg-[length:100%_100%] bg-[bottom] py-[5px] text-gray-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:border before:border-transparent before:[background:linear-gradient(to_right,var(--color-gray-800),var(--color-gray-700),var(--color-gray-800))_border-box] before:[mask-composite:exclude_!important] before:[mask:linear-gradient(white_0_0)_padding-box,_linear-gradient(white_0_0)] hover:bg-[length:100%_150%]"
-            onClick={() => navigateTo("addFunds")}
-          >
-            Add Funds
-          </button>
-          <button
-            className="btn-sm relative bg-linear-to-b from-gray-800 to-gray-800/60 bg-[length:100%_100%] bg-[bottom] py-[5px] text-gray-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:border before:border-transparent before:[background:linear-gradient(to_right,var(--color-gray-800),var(--color-gray-700),var(--color-gray-800))_border-box] before:[mask-composite:exclude_!important] before:[mask:linear-gradient(white_0_0)_padding-box,_linear-gradient(white_0_0)] hover:bg-[length:100%_150%]"
-            onClick={() => navigateTo("create")}
-          >
-            Create NFT
-          </button>
-          <button
-            className="btn-sm relative bg-linear-to-b from-gray-800 to-gray-800/60 bg-[length:100%_100%] bg-[bottom] py-[5px] text-gray-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:border before:border-transparent before:[background:linear-gradient(to_right,var(--color-gray-800),var(--color-gray-700),var(--color-gray-800))_border-box] before:[mask-composite:exclude_!important] before:[mask:linear-gradient(white_0_0)_padding-box,_linear-gradient(white_0_0)] hover:bg-[length:100%_150%]"
-            onClick={onLogout}
-          >
-            Logout
-          </button>
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <button
-            className="btn-sm relative bg-linear-to-b from-gray-800 to-gray-800/60 bg-[length:100%_100%] bg-[bottom] py-[5px] text-gray-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:border before:border-transparent before:[background:linear-gradient(to_right,var(--color-gray-800),var(--color-gray-700),var(--color-gray-800))_border-box] before:[mask-composite:exclude_!important] before:[mask:linear-gradient(white_0_0)_padding-box,_linear-gradient(white_0_0)] hover:bg-[length:100%_150%]"
-            onClick={() => navigateTo("login")}
-          >
-            Login
-          </button>
-          <button
-            className="btn-sm bg-linear-to-t from-indigo-600 to-indigo-500 bg-[length:100%_100%] bg-[bottom] py-[5px] text-white shadow-[inset_0px_1px_0px_0px_--theme(--color-white/.16)] hover:bg-[length:100%_150%]"
-            onClick={() => navigateTo("register")}
-          >
-            Register
-          </button>
-        </div>
-      )}
 
-      </div>
+          {isLoggedIn ? (
+            <div className="flex flex-1 items-center justify-end gap-3">
+              <span className="text-indigo-100 text-sm">
+                Welcome, {username} | {balance} Shekel Coins
+              </span>
+              <button
+                className="btn-sm bg-gray-800 py-[5px] text-gray-300"
+                onClick={() => navigateTo("account")}
+              >
+                Account
+              </button>
+              <button
+                className="btn-sm bg-gray-800 py-[5px] text-gray-300"
+                onClick={() => navigateTo("addFunds")}
+              >
+                Add Funds
+              </button>
+              <button
+                className="btn-sm bg-gray-800 py-[5px] text-gray-300"
+                onClick={() => navigateTo("create")}
+              >
+                Create NFT
+              </button>
+              <button
+                className="btn-sm bg-gray-800 py-[5px] text-gray-300"
+                onClick={onLogout}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                className="btn-sm bg-gray-800 py-[5px] text-gray-300"
+                onClick={() => navigateTo("login")}
+              >
+                Login
+              </button>
+              <button
+                className="btn-sm bg-gradient-to-t from-indigo-600 to-indigo-500 py-[5px] text-white"
+                onClick={() => navigateTo("register")}
+              >
+                Register
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );
