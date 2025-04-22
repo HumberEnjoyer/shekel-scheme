@@ -7,6 +7,8 @@
 body {
   @apply bg-[#0f0f1b] text-[#e2e8f0];
   font-family: sans-serif; /* Removed the custom font variable */
+  overflow-x: hidden;
+  display: block !important;
 }
 
 .btn {
